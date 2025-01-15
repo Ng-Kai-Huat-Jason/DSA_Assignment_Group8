@@ -197,6 +197,9 @@ int main()
 		// Call Main Menu
 		mainMenu();
 
+		// Call add Sample Data
+		addSampleData();
+
 		int choice;
 		cin >> choice;
 
