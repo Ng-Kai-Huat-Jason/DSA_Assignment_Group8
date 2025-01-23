@@ -1,4 +1,11 @@
-﻿  Dictionary.cpp
+﻿  ActorAVLTree.cpp
+C:\Users\admin\OneDrive - Ngee Ann Polytechnic\Y2-SEM2\DSA\Assignment\DSA_Assignment\DSA_Assignment\ActorAVLTree.cpp(106,12): error C3861: 'getActorNodeHelper': identifier not found
   DSA_Assignment.cpp
+  MovieAVLTree.cpp
+C:\Users\admin\OneDrive - Ngee Ann Polytechnic\Y2-SEM2\DSA\Assignment\DSA_Assignment\DSA_Assignment\MovieAVLTree.cpp(133,12): error C3861: 'findMovieNodeHelper': identifier not found
+  MovieHashTable.cpp
+C:\Users\admin\OneDrive - Ngee Ann Polytechnic\Y2-SEM2\DSA\Assignment\DSA_Assignment\DSA_Assignment\MovieHashTable.cpp(40,46): error C2039: 'getActorNode': is not a member of 'Actor'
+      C:\Users\admin\OneDrive - Ngee Ann Polytechnic\Y2-SEM2\DSA\Assignment\DSA_Assignment\DSA_Assignment\Actor.h(6,7):
+      see declaration of 'Actor'
+  
   Generating Code...
-  DSA_Assignment.vcxproj -> C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\x64\Debug\DSA_Assignment.exe
