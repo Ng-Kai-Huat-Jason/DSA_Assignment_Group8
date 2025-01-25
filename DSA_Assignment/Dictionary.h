@@ -2,45 +2,24 @@
 #define DICTIONARY_H
 
 #include <string>
-#include <vector>
 #include <iostream>
-
 using namespace std;
 
-// Constants
-const int MAX_SIZE = 101;
+const int MAX_SIZE = 101; // Prime number for better hash distribution
 
-// Types
-struct Actor {
-    string id;
-    string name;
-    int birth;
-};
-
-struct Movie {
-    string id;
-    string title;
-    string plot;
-    int year;
-};
-
-struct Cast {
-    string person_id;
-    string movie_id;
-};
-
-template <typename KeyType, typename ItemType>
+template <typename KeyType, typename ValueType>
 struct Node {
     KeyType key;
-    ItemType item;
+    ValueType* value;
     Node* next;
+
+    Node(KeyType key, ValueType* value) : key(key), value(value), next(nullptr) {}
 };
 
-// Dictionary Class
-template <typename KeyType, typename ItemType>
+template <typename KeyType, typename ValueType>
 class Dictionary {
 private:
-    Node<KeyType, ItemType>* items[MAX_SIZE];
+    Node<KeyType, ValueType>* table[MAX_SIZE];
     int size;
 
     int hash(KeyType key) const;
@@ -49,13 +28,12 @@ public:
     Dictionary();
     ~Dictionary();
 
-    bool add(KeyType newKey, ItemType newItem);
+    bool add(KeyType key, ValueType* value);
     bool remove(KeyType key);
-    ItemType* get(KeyType key);
+    ValueType* get(KeyType key);
     bool isEmpty() const;
-    int getLength() const;
+    int getSize() const;
 
-    // Utility methods for display
     void print() const;
 };
 

@@ -1,15 +1,40 @@
 #pragma once
 #include <string>
-#include "Actor.h"
-#include "DoublyLinkedList.h"
+#include <iostream>
+#include <vector>
 
-using namespace std;
+class Actor; // Forward declaration
 
-struct Movie {
-    string title;
-    string plot;
+class Movie {
+public:
+    std::string id;
+    std::string title;
+    std::string plot;
     int year;
-    DoublyLinkedList<Actor*> actors;  // list of actors related to this movie
+    std::vector<Actor*> actors;
 
-    Movie(string title, string plot, int year) : title(title), plot(plot), year(year) {}
+    Movie(std::string id, std::string title, std::string plot, int year)
+        : id(id), title(title), plot(plot), year(year) {
+    }
+
+    void addActor(Actor* actor) {
+        actors.push_back(actor);
+    }
+
+    // Overload < operator
+    bool operator<(const Movie& other) const {
+        return this->year < other.year;
+    }
+
+    // Overload > operator
+    bool operator>(const Movie& other) const {
+        return this->year > other.year;
+    }
+
+    // Overload << operator
+    friend std::ostream& operator<<(std::ostream& os, const Movie& movie) {
+        os << "Movie(ID: " << movie.id << ", Title: " << movie.title
+            << ", Year: " << movie.year << ", Plot: " << movie.plot << ")";
+        return os;
+    }
 };

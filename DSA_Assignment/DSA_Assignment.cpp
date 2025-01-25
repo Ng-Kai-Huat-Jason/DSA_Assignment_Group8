@@ -4,267 +4,375 @@
 
 using namespace std;
 
+// Imports
 #include <iostream>
 #include <string>
-
 #include "Dictionary.h"
+#include "Actor.h"
+#include "Movie.h"
+#include "AVLTree.h"
+#include "Graph.h"
+#include <fstream>
+#include <sstream>
 
-// Create dictionaries for actors, movies, and casts
+// Data structures for actors and movies
 Dictionary<string, Actor> actorDictionary;
 Dictionary<string, Movie> movieDictionary;
-Dictionary<string, Cast> castDictionary;
+AVLTree<Actor> actorAVLTree;
+AVLTree<Movie> movieAVLTree;
+Graph<string> actorMovieGraph;
 
-// Functions 
+// Menu Functions
 void mainMenu() {
-	cout << "-------------------------" << endl;
-	cout << "Movie Information Helper" << endl;
-	cout << "-------------------------" << endl;
-	cout << "(1) Enter as Admin" << endl;
-	cout << "(2) Enter as User" << endl;
-	cout << "-------------------------" << endl;
-	cout << "Enter your choice: ";
+    cout << "-------------------------" << endl;
+    cout << "Movie Information Helper" << endl;
+    cout << "-------------------------" << endl;
+    cout << "(1) Enter as Admin" << endl;
+    cout << "(2) Enter as User" << endl;
+    cout << "-------------------------" << endl;
+    cout << "Enter your choice: ";
 }
 
 void adminMenu() {
-	cout << "-------------------------" << endl;
-	cout << "      Admin Menu" << endl;
-	cout << "-------------------------" << endl;
-	cout << "(1) Add new actor" << endl;
-	cout << "(2) Add new movie" << endl;
-	cout << "(3) Add an actor to a movie" << endl;
-	cout << "(4) Add update actor/movie details" << endl;
-	cout << "(5) Go back to Main Menu" << endl;
-	cout << "-------------------------" << endl;
-	cout << "Enter your choice: ";
+    cout << "-------------------------" << endl;
+    cout << "      Admin Menu" << endl;
+    cout << "-------------------------" << endl;
+    cout << "(1) Add new actor" << endl;
+    cout << "(2) Add new movie" << endl;
+    cout << "(3) Add an actor to a movie" << endl;
+    cout << "(4) Update actor/movie details" << endl;
+    cout << "(5) Go back to Main Menu" << endl;
+    cout << "-------------------------" << endl;
+    cout << "Enter your choice: ";
 }
 
-void userMenu() {
-	cout << "-------------------------" << endl;
-	cout << "      User Menu" << endl;
-	cout << "-------------------------" << endl;
-	cout << "(1) Display actors between a certain age in ascending order" << endl;
-	cout << "(2) Display movies made within the past 3 years in ascending order" << endl;
-	cout << "(3) Display all movies and actors starred in alphabetical order" << endl;
-	cout << "(4) Display all the actors in a particular movie in alphabetical order" << endl;
-	cout << "(5) Display list of actors that a particular actor knows" << endl;
-	cout << "(6) Go back to Main Menu" << endl;
-	cout << "-------------------------" << endl;
-	cout << "Enter your choice: ";
+// CSV Functions 
+// Function to load actors from CSV
+void loadActorsFromCSV(const string& fileName) {
+    ifstream file(fileName);
+    if (!file.is_open()) {
+        cout << "Failed to open " << fileName << endl;
+        return;
+    }
+
+    string line;
+
+    // Skip the header row
+    getline(file, line);
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string id, name, birthYearStr;
+        int birthYear;
+
+        getline(ss, id, ',');
+        getline(ss, name, ',');
+        getline(ss, birthYearStr, ',');
+
+        // Validate and parse birthYear
+        try {
+            birthYear = stoi(birthYearStr);
+        }
+        catch (const invalid_argument& e) {
+            cout << "Invalid birth year for actor ID: " << id << endl;
+            continue; // Skip this row
+        }
+
+        Actor* newActor = new Actor(id, name, birthYear);
+
+        // Add actor to Dictionary and AVL Tree
+        actorDictionary.add(id, newActor);
+        actorAVLTree.insert(newActor);
+    }
+
+    file.close();
+    cout << "Actors loaded successfully from " << fileName << endl;
 }
+
+
+// Function to load movies from CSV
+void loadMoviesFromCSV(const string& fileName) {
+    ifstream file(fileName);
+    if (!file.is_open()) {
+        cout << "Failed to open " << fileName << endl;
+        return;
+    }
+
+    string line;
+
+    // Skip the header row
+    getline(file, line);
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string id, title, plot, yearStr;
+        int year;
+
+        getline(ss, id, ',');
+        getline(ss, title, ',');
+        getline(ss, plot, ',');
+        getline(ss, yearStr, ',');
+
+        // Validate and parse year
+        try {
+            year = stoi(yearStr);
+        }
+        catch (const invalid_argument& e) {
+            cout << "Invalid year for movie ID: " << id << endl;
+            continue; // Skip this row
+        }
+
+        Movie* newMovie = new Movie(id, title, plot, year);
+
+        // Add movie to Dictionary and AVL Tree
+        movieDictionary.add(id, newMovie);
+        movieAVLTree.insert(newMovie);
+    }
+
+    file.close();
+    cout << "Movies loaded successfully from " << fileName << endl;
+}
+
+
+// Function to load cast relationships from CSV
+void loadCastsFromCSV(const string& fileName) {
+    ifstream file(fileName);
+    if (!file.is_open()) {
+        cout << "Failed to open " << fileName << endl;
+        return;
+    }
+
+    string line;
+
+    // Skip the header row
+    getline(file, line);
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string actorId, movieId;
+
+        getline(ss, actorId, ',');
+        getline(ss, movieId, ',');
+
+        // Ensure actor exists in the graph
+        if (actorDictionary.get(actorId)) {
+            actorMovieGraph.addNode(actorId);
+        }
+
+        // Ensure movie exists in the graph
+        if (movieDictionary.get(movieId)) {
+            actorMovieGraph.addNode(movieId);
+        }
+
+        // Add edge between actor and movie
+        if (actorDictionary.get(actorId) && movieDictionary.get(movieId)) {
+            actorMovieGraph.addEdge(actorId, movieId);
+        }
+        else {
+            cout << "Error: One or both nodes not found in the graph! (" << actorId << ", " << movieId << ")" << endl;
+        }
+    }
+
+    file.close();
+    cout << "Casts loaded successfully from " << fileName << endl;
+}
+
 
 // Function to handle adding a new actor
 void addActor() {
-	Actor newActor;
-	cout << "Enter Actor ID: ";
-	cin >> newActor.id;
-	cout << "Enter Actor Name: ";
-	cin.ignore();
-	getline(cin, newActor.name);
-	cout << "Enter Actor Birth Year: ";
-	cin >> newActor.birth;
+    string id, name;
+    int birthYear;
 
-	if (actorDictionary.add(newActor.id, newActor)) {
-		cout << "Actor added successfully!\n";
-	}
-	else {
-		cout << "Actor with this ID already exists.\n";
-	}
+    cout << "Enter Actor ID: ";
+    cin >> id;
+    cout << "Enter Actor Name: ";
+    cin.ignore();
+    getline(cin, name);
+    cout << "Enter Actor Birth Year: ";
+    cin >> birthYear;
+
+    Actor* newActor = new Actor(id, name, birthYear);
+
+    // Add to Dictionary
+    if (actorDictionary.add(id, newActor)) {
+        cout << "Actor added to Dictionary successfully!\n";
+    }
+    else {
+        cout << "Actor with this ID already exists in Dictionary.\n";
+    }
+
+    // Add to AVL Tree
+    actorAVLTree.insert(newActor);
+    cout << "Actor added to AVL Tree successfully!\n";
 }
+
+
 
 // Function to handle adding a new movie
 void addMovie() {
-	Movie newMovie;
-	cout << "Enter Movie ID: ";
-	cin >> newMovie.id;
-	cout << "Enter Movie Title: ";
-	cin.ignore();
-	getline(cin, newMovie.title);
-	cout << "Enter Movie Plot: ";
-	getline(cin, newMovie.plot);
-	cout << "Enter Movie Year: ";
-	cin >> newMovie.year;
+    string id, title, plot;
+    int year;
 
-	if (movieDictionary.add(newMovie.id, newMovie)) {
-		cout << "Movie added successfully!\n";
-	}
-	else {
-		cout << "Movie with this ID already exists.\n";
-	}
+    cout << "Enter Movie ID: ";
+    cin >> id;
+    cout << "Enter Movie Title: ";
+    cin.ignore();
+    getline(cin, title);
+    cout << "Enter Movie Plot: ";
+    getline(cin, plot);
+    cout << "Enter Movie Year: ";
+    cin >> year;
+
+    Movie* newMovie = new Movie(id, title, plot, year);
+
+    // Add to Dictionary
+    if (movieDictionary.add(id, newMovie)) {
+        cout << "Movie added to Dictionary successfully!\n";
+    }
+    else {
+        cout << "Movie with this ID already exists in Dictionary.\n";
+    }
+
+    // Add to AVL Tree
+    movieAVLTree.insert(newMovie);
+    cout << "Movie added to AVL Tree successfully!\n";
 }
+
 
 // Function to handle adding an actor to a movie
 void addActorToMovie() {
-	string actorId, movieId;
-	cout << "Enter Actor ID: ";
-	cin >> actorId;
-	cout << "Enter Movie ID: ";
-	cin >> movieId;
+    string actorId, movieId;
 
-	Actor* actor = actorDictionary.get(actorId);
-	Movie* movie = movieDictionary.get(movieId);
+    cout << "Enter Actor ID: ";
+    cin >> actorId;
+    cout << "Enter Movie ID: ";
+    cin >> movieId;
 
-	if (actor && movie) {
-		Cast newCast = { actorId, movieId };
-		string castKey = actorId + ":" + movieId;
+    Actor* actor = actorDictionary.get(actorId);
+    Movie* movie = movieDictionary.get(movieId);
 
-		if (castDictionary.add(castKey, newCast)) {
-			cout << "Actor added to movie successfully!\n";
-		}
-		else {
-			cout << "This actor is already part of the movie.\n";
-		}
-	}
-	else {
-		cout << "Invalid Actor ID or Movie ID.\n";
-	}
+    if (actor && movie) {
+        actor->addMovie(movie);
+        movie->addActor(actor);
+
+        // Update Graph
+        actorMovieGraph.addEdge(actorId, movieId);
+
+        cout << "Actor added to Movie and Graph successfully!\n";
+    }
+    else {
+        cout << "Invalid Actor ID or Movie ID.\n";
+    }
 }
+
 
 // Function to update an actor or movie details
 void updateDetails() {
-	int updateChoice;
-	cout << "Update: (1) Actor Details, (2) Movie Details: ";
-	cin >> updateChoice;
+    int updateChoice;
 
-	if (updateChoice == 1) {
-		string actorId;
-		cout << "Enter Actor ID to update: ";
-		cin >> actorId;
+    cout << "Update: (1) Actor Details, (2) Movie Details: ";
+    cin >> updateChoice;
 
-		Actor* actor = actorDictionary.get(actorId);
-		if (actor) {
-			cout << "Enter new Name (current: " << actor->name << "): ";
-			cin.ignore();
-			getline(cin, actor->name);
-			cout << "Enter new Birth Year (current: " << actor->birth << "): ";
-			cin >> actor->birth;
+    if (updateChoice == 1) {
+        string actorId;
 
-			cout << "Actor details updated successfully!\n";
-		}
-		else {
-			cout << "Actor not found.\n";
-		}
-	}
-	else if (updateChoice == 2) {
-		string movieId;
-		cout << "Enter Movie ID to update: ";
-		cin >> movieId;
+        cout << "Enter Actor ID to update: ";
+        cin >> actorId;
 
-		Movie* movie = movieDictionary.get(movieId);
-		if (movie) {
-			cout << "Enter new Title (current: " << movie->title << "): ";
-			cin.ignore();
-			getline(cin, movie->title);
-			cout << "Enter new Plot (current: " << movie->plot << "): ";
-			getline(cin, movie->plot);
-			cout << "Enter new Year (current: " << movie->year << "): ";
-			cin >> movie->year;
+        Actor* actor = actorDictionary.get(actorId);
+        if (actor) {
+            cout << "Enter new Name (current: " << actor->name << "): ";
+            cin.ignore();
+            getline(cin, actor->name);
+            cout << "Enter new Birth Year (current: " << actor->birthYear << "): ";
+            cin >> actor->birthYear;
 
-			cout << "Movie details updated successfully!\n";
-		}
-		else {
-			cout << "Movie not found.\n";
-		}
-	}
-	else {
-		cout << "Invalid choice.\n";
-	}
+            cout << "Actor details updated successfully!\n";
+
+            // Re-insert into AVL Tree to maintain order
+            actorAVLTree.insert(actor);
+        }
+        else {
+            cout << "Actor not found.\n";
+        }
+    }
+    else if (updateChoice == 2) {
+        string movieId;
+
+        cout << "Enter Movie ID to update: ";
+        cin >> movieId;
+
+        Movie* movie = movieDictionary.get(movieId);
+        if (movie) {
+            cout << "Enter new Title (current: " << movie->title << "): ";
+            cin.ignore();
+            getline(cin, movie->title);
+            cout << "Enter new Plot (current: " << movie->plot << "): ";
+            getline(cin, movie->plot);
+            cout << "Enter new Year (current: " << movie->year << "): ";
+            cin >> movie->year;
+
+            cout << "Movie details updated successfully!\n";
+
+            // Re-insert into AVL Tree to maintain order
+            movieAVLTree.insert(movie);
+        }
+        else {
+            cout << "Movie not found.\n";
+        }
+    }
+    else {
+        cout << "Invalid choice.\n";
+    }
 }
 
-void addSampleData() {
-	// Add sample actors
-	Actor actor1 = { "111", "Tom Hanks", 1956 };
-	Actor actor2 = { "222", "Leonardo DiCaprio", 1974 };
-	actorDictionary.add(actor1.id, actor1);
-	actorDictionary.add(actor2.id, actor2);
+int main() {
+    // Load data from CSV files
+    loadActorsFromCSV("../actors.csv");
+    loadMoviesFromCSV("../movies.csv");
+    loadCastsFromCSV("../cast.csv");
 
-	// Add sample movies
-	Movie movie1 = { "333", "Forrest Gump", "The story of a man running", 1994 };
-	Movie movie2 = { "444", "Inception", "Dream within a dream in a dream", 2010 };
-	movieDictionary.add(movie1.id, movie1);
-	movieDictionary.add(movie2.id, movie2);
 
-	// Add sample casts
-	Cast cast1 = { actor1.id, movie1.id };
-	Cast cast2 = { actor2.id, movie2.id };
-	castDictionary.add(cast1.person_id + ":" + cast1.movie_id, cast1);
-	castDictionary.add(cast2.person_id + ":" + cast2.movie_id, cast2);
+    while (true) {
+        mainMenu();
 
+        int choice;
+        cin >> choice;
+
+        if (choice == 1) {
+            while (true) {
+                adminMenu();
+
+                int adminChoice;
+                cin >> adminChoice;
+
+                if (adminChoice == 1) {
+                    addActor();
+                }
+                else if (adminChoice == 2) {
+                    addMovie();
+                }
+                else if (adminChoice == 3) {
+                    addActorToMovie();
+                }
+                else if (adminChoice == 4) {
+                    updateDetails();
+                }
+                else if (adminChoice == 5) {
+                    cout << "Returning to Main Menu...\n";
+                    break;
+                }
+                else {
+                    cout << "Invalid input, please try again.\n";
+                }
+            }
+        }
+        else if (choice == 2) {
+            cout << "User features are under development.\n";
+        }
+        else {
+            cout << "Invalid input, please try again.\n";
+        }
+    }
 }
 
-int main()
-{
-	while (true) {
-		// Call Main Menu
-		mainMenu();
-
-		// Call add Sample Data
-		addSampleData();
-
-		int choice;
-		cin >> choice;
-
-		if (choice == 1) {
-			while (true) {
-				// Calling Admin Menu 
-				cout << "\n";
-				adminMenu();
-
-				int adminChoice;
-				cin >> adminChoice;
-
-				if (adminChoice == 1) {
-					addActor();
-				}
-				else if (adminChoice == 2) {
-					addMovie();
-				}
-				else if (adminChoice == 3) {
-					addActorToMovie();
-				}
-				else if (adminChoice == 4) {
-					updateDetails();
-				}
-				else if (adminChoice == 5) {
-					cout << "Returning to Main Menu...\n";
-					cout << "\n";
-					break; // Exit the Admin menu loop
-				}
-				else {
-					cout << "Invalid input, please try again.\n";
-				}
-			}
-		}
-
-		else if (choice == 2) {
-			// User Menu Options
-			cout << "\n" << endl;
-			userMenu();
-
-			int userChoice;
-			cin >> userChoice;
-
-			if (userChoice == 1) {
-			}
-			else if (userChoice == 2) {
-			}
-			else if (userChoice == 3) {
-			}
-			else if (userChoice == 4) {
-			}
-			else if (userChoice == 5) {
-			}
-			else if (userChoice == 6) {
-				// Go back to Main Menu
-				cout << "Returning to Main Menu..." << endl;
-				cout << "\n" << endl;
-			}
-			else {
-				cout << "Invalid input, please try again." << endl;
-			}
-
-		}
-		else {
-			cout << "Invalid input, please try again." << endl;
-		}
-	}
-}

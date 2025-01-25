@@ -128,22 +128,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
-    <ClCompile Include="ActorAVLTree.cpp" />
+    <ClCompile Include="AVLTree.cpp" />
     <ClCompile Include="Dictionary.cpp" />
-    <ClCompile Include="DoublyLinkedList.cpp" />
     <ClCompile Include="DSA_Assignment.cpp" />
+    <ClCompile Include="Graph.cpp" />
     <ClCompile Include="Movie.cpp" />
-    <ClCompile Include="MovieAVLTree.cpp" />
-    <ClCompile Include="MovieHashTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
-    <ClInclude Include="ActorAVLTree.h" />
+    <ClInclude Include="AVLTree.h" />
     <ClInclude Include="Dictionary.h" />
-    <ClInclude Include="DoublyLinkedList.h" />
+    <ClInclude Include="Graph.h" />
     <ClInclude Include="Movie.h" />
-    <ClInclude Include="MovieAVLTree.h" />
-    <ClInclude Include="MovieHashTable.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\actors.csv" />
+    <None Include="..\cast.csv" />
+    <None Include="..\movies.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

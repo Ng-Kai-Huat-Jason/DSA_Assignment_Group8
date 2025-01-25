@@ -21,22 +21,16 @@
     <ClCompile Include="Dictionary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MovieAVLTree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Movie.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MovieHashTable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DoublyLinkedList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Actor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ActorAVLTree.cpp">
+    <ClCompile Include="AVLTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,23 +38,22 @@
     <ClInclude Include="Dictionary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MovieAVLTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Movie.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MovieHashTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DoublyLinkedList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Actor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ActorAVLTree.h">
+    <ClInclude Include="AVLTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\actors.csv" />
+    <None Include="..\cast.csv" />
+    <None Include="..\movies.csv" />
   </ItemGroup>
 </Project>
