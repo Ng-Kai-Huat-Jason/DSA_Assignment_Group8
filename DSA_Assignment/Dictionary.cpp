@@ -18,6 +18,7 @@ Dictionary<KeyType, ValueType>::~Dictionary() {
         while (current) {
             Node<KeyType, ValueType>* toDelete = current;
             current = current->next;
+            delete toDelete->value;
             delete toDelete;
         }
     }
@@ -37,6 +38,16 @@ int Dictionary<KeyType, ValueType>::hash(KeyType key) const {
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::add(KeyType key, ValueType* value) {
     int index = hash(key);
+    
+    Node<KeyType, ValueType>* current = table[index];
+    while (current) {
+        if (current->key == key) {
+            cout << "Error: Duplicate key detected!" << endl;
+            return false;
+        }
+        current = current->next;
+    }
+
     Node<KeyType, ValueType>* newNode = new Node<KeyType, ValueType>(key, value);
     newNode->next = table[index];
     table[index] = newNode;
@@ -101,7 +112,7 @@ void Dictionary<KeyType, ValueType>::print() const {
     for (int i = 0; i < MAX_SIZE; i++) {
         Node<KeyType, ValueType>* current = table[i];
         while (current) {
-            cout << "Key: " << current->key << ", Value: (Address: " << current->value << ")" << endl;
+            cout << "Key: " << current->key << ", Value: (Address: " << *(current->value) << ")" << endl;
             current = current->next;
         }
     }

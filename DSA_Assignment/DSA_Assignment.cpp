@@ -86,6 +86,15 @@ void loadActorsFromCSV(const string& fileName) {
         getline(ss, name, ',');
         getline(ss, birthYearStr, ',');
 
+        // remove leading and trailing quotes if present
+        if (!name.empty() && name.front() == '"') {
+            name.erase(0, 1); // Remove leading quote
+        }
+
+        if (!name.empty() && name.back() == '"') {
+            name.erase(name.size() - 1); // Remove trailing quotes
+        }
+
         // Validate and parse birthYear
         try {
             birthYear = stoi(birthYearStr);
@@ -171,19 +180,25 @@ void loadCastsFromCSV(const string& fileName) {
         getline(ss, actorId, ',');
         getline(ss, movieId, ',');
 
-        // Ensure actor exists in the graph
-        if (actorDictionary.get(actorId)) {
-            actorMovieGraph.addNode(actorId);
+        // Ensure actor exists in the graph by name
+        Actor* actor = actorDictionary.get(actorId);
+        if (actor) {
+            if (!actorMovieGraph.nodeExists(actor->name)) {
+                actorMovieGraph.addNode(actor->name);
+            }
         }
 
         // Ensure movie exists in the graph
-        if (movieDictionary.get(movieId)) {
-            actorMovieGraph.addNode(movieId);
+        Movie* movie = movieDictionary.get(movieId);
+        if (movie) {
+            if (!actorMovieGraph.nodeExists(movie->title)) {
+                actorMovieGraph.addNode(movie->title);
+            }
         }
 
         // Add edge between actor and movie
-        if (actorDictionary.get(actorId) && movieDictionary.get(movieId)) {
-            actorMovieGraph.addEdge(actorId, movieId);
+        if (actor && movie) {
+            actorMovieGraph.addEdge(actor->name, movie->title);
         }
         else {
             cout << "Error: One or both nodes not found in the graph! (" << actorId << ", " << movieId << ")" << endl;
@@ -221,6 +236,10 @@ void addActor() {
     // Add to AVL Tree
     actorAVLTree.insert(newActor);
     cout << "Actor added to AVL Tree successfully!\n";
+
+    // Add actor to graph
+    actorMovieGraph.addNode(name);
+    cout << "Actor added to graph successfully!\n";
 }
 
 
@@ -253,6 +272,10 @@ void addMovie() {
     // Add to AVL Tree
     movieAVLTree.insert(newMovie);
     cout << "Movie added to AVL Tree successfully!\n";
+
+    // Add movie to graph
+    actorMovieGraph.addNode(title);
+    cout << "Movie added to graph successfully!\n";
 }
 
 
@@ -273,7 +296,7 @@ void addActorToMovie() {
         movie->addActor(actor);
 
         // Update Graph
-        actorMovieGraph.addEdge(actorId, movieId);
+        actorMovieGraph.addEdge(actor->name, movie->title);
 
         cout << "Actor added to Movie and Graph successfully!\n";
     }
@@ -427,9 +450,66 @@ void displayActorsByAgeRange() {
     }
 }
 
+void getMoviesByActor() {
+    string actorName;
+    cout << "Enter actor name: ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, actorName);
 
+    // Check if the actor exists in the graph
+    int actorIndex = actorMovieGraph.getNodeIndex(actorName);
+    if (actorIndex == -1) {
+        cout << "\nActor \"" << actorName << "\" not found." << endl;
+        return;
+    }
 
+    // Retrieve the movies for the actor 
+    vector<string> movies = actorMovieGraph.getNeighbors(actorName);
 
+    if (movies.empty()) {
+        cout << "\nNo movies found for the actor \"" << actorName << "\"." << endl;
+    }
+    else {
+        cout << "\nMovies played by " << actorName << ":" << endl;
+        for (const auto& movie : movies) {
+            cout << " - " << movie << endl;
+        }
+    }
+}
+
+void getActorsByMovie() {
+    string movieTitle;
+    cout << "Enter movie title: ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear any leftover input
+    getline(cin, movieTitle);
+
+    // Check if the movie exists in the graph
+    int movieIndex = actorMovieGraph.getNodeIndex(movieTitle);
+    if (movieIndex == -1) {
+        cout << "\nMovie \"" << movieTitle << "\" not found in the graph." << endl;
+        return;
+    }
+
+    // Retrieve the actors for the movie (actors are the neighbors of the movie node)
+    vector<string> actors = actorMovieGraph.getNeighbors(movieTitle);
+
+    if (actors.empty()) {
+        cout << "\nNo actors found for the movie \"" << movieTitle << "\"." << endl;
+    }
+    else {
+        // Sort actors alphabetically
+        sort(actors.begin(), actors.end());
+
+        cout << "\nActors in \"" << movieTitle << "\":" << endl;
+        for (const auto& actor : actors) {
+            cout << " - " << actor << endl;
+        }
+    }
+}
+
+void displayKnownActors() {
+
+}
 
 int main() {
     // Load data from CSV files
@@ -451,23 +531,29 @@ int main() {
                 int adminChoice;
                 cin >> adminChoice;
 
-                if (adminChoice == 1) {
-                    addActor();
-                }
-                else if (adminChoice == 2) {
-                    addMovie();
-                }
-                else if (adminChoice == 3) {
-                    addActorToMovie();
-                }
-                else if (adminChoice == 4) {
-                    updateDetails();
-                }
-                else if (adminChoice == 5) {
+                if (adminChoice == 5) {
                     cout << "Returning to Main Menu...\n";
                     break;
                 }
-                else {
+
+                switch (adminChoice) {
+                case 1: {
+                    addActor();
+                    break;
+                }
+                case 2: {
+                    addMovie();
+                    break;
+                }
+                case 3: {
+                    addActorToMovie();
+                    break;
+                }
+                case 4: {
+                    updateDetails();
+                    break;
+                }
+                default : 
                     cout << "Invalid input, please try again.\n";
                 }
             }
@@ -499,17 +585,20 @@ int main() {
 
                 case 3: {
                     // Feature G: Display all movies an actor starred in
-                    cout << "Feature G is under development.\n";
+                    getMoviesByActor();
+                    break;
                 }
 
                 case 4:{
                     // Feature H: Display all the actors in a particular movie
-                    cout << "Feature H is under development.\n";
+                    getActorsByMovie();
+                    break;
                 }
                
                 case 5: {
                     // Feature I: Display list of actors a particular actor knows
-                    cout << "Feature I is under development.\n";
+                    displayKnownActors();
+                    break;
                 }
                 
                 default:
