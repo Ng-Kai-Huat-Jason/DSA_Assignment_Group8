@@ -1,6 +1,6 @@
 // DSA_Assignment.cpp : This file contains the 'main' function. Program execution begins and ends there.
 // Student 1: Ng Kai Huat Jason(S10262552)
-// Student 2: Law Ming Qi
+// Student 2: Law Ming Qi (S10257808)
 
 using namespace std;
 
@@ -14,6 +14,8 @@ using namespace std;
 #include "Graph.h"
 #include <fstream>
 #include <sstream>
+#include <algorithm> // For sorting
+#include <ctime>     // For getting the current year dynamically
 
 // Data structures for actors and movies
 Dictionary<string, Actor> actorDictionary;
@@ -45,6 +47,21 @@ void adminMenu() {
     cout << "-------------------------" << endl;
     cout << "Enter your choice: ";
 }
+
+void userMenu() {
+    cout << "-------------------------" << endl;
+    cout << "      User Menu" << endl;
+    cout << "-------------------------" << endl;
+    cout << "(1) Display actors between a certain age in ascending order" << endl;
+    cout << "(2) Display movies made within the past 3 years in ascending order" << endl;
+    cout << "(3) Display all movies an actor starred in (in alphabetical order)" << endl;
+    cout << "(4) Display all the actors in a particular movie (in alphabetical order)" << endl;
+    cout << "(5) Display a list of all actors that a particular actor knows" << endl;
+    cout << "(6) Go back to Main Menu" << endl;
+    cout << "-------------------------" << endl;
+    cout << "Enter your choice: ";
+}
+
 
 // CSV Functions 
 // Function to load actors from CSV
@@ -326,12 +343,99 @@ void updateDetails() {
     }
 }
 
+void displayRecentMovies() {
+    // Get the current year
+    time_t t = time(nullptr);
+    tm currentTime;
+    localtime_s(&currentTime, &t);
+    int currentYear = 1900 + currentTime.tm_year;
+
+    // Get all movies from the dictionary
+    vector<Movie*> allMovies = movieDictionary.getAllItems();
+
+    // Filter movies made within the past 3 years
+    vector<Movie*> recentMovies;
+    for (Movie* movie : allMovies) {
+        if (currentYear - movie->year <= 3) {
+            recentMovies.push_back(movie);
+        }
+    }
+
+    // Sort movies by year in ascending order
+    for (size_t i = 0; i < recentMovies.size(); ++i) {
+        for (size_t j = i + 1; j < recentMovies.size(); ++j) {
+            if (recentMovies[i]->year > recentMovies[j]->year) {
+                // Swap movies
+                Movie* temp = recentMovies[i];
+                recentMovies[i] = recentMovies[j];
+                recentMovies[j] = temp;
+            }
+        }
+    }
+
+    // Display the movies
+    cout << "Movies made within the past 3 years (in ascending order):" << endl;
+    for (const Movie* movie : recentMovies) {
+        cout << "Title: " << movie->title << ", Year: " << movie->year << ", Plot: " << movie->plot << endl;
+    }
+}
+
+void displayActorsByAgeRange() {
+    int x, y;
+
+    // Get the current year
+    time_t t = time(nullptr);
+    tm currentTime;
+    localtime_s(&currentTime, &t);
+    int currentYear = 1900 + currentTime.tm_year;
+
+    // Get age range from the user
+    cout << "Enter the lower age limit (x): ";
+    cin >> x;
+    cout << "Enter the upper age limit (y): ";
+    cin >> y;
+
+    // Store actors in a vector
+    vector<Actor*> filteredActors;
+    vector<Actor*> allActors = actorDictionary.getAllItems();
+
+    // Filter actors by age range
+    for (Actor* actor : allActors) {
+        int age = currentYear - actor->birthYear;
+        if (age >= x && age <= y) {
+            filteredActors.push_back(actor);
+        }
+    }
+
+    // Sort actors by ascending age
+    for (size_t i = 0; i < filteredActors.size(); ++i) {
+        for (size_t j = i + 1; j < filteredActors.size(); ++j) {
+            int ageI = currentYear - filteredActors[i]->birthYear;
+            int ageJ = currentYear - filteredActors[j]->birthYear;
+            if (ageI > ageJ) {
+                Actor* temp = filteredActors[i];
+                filteredActors[i] = filteredActors[j];
+                filteredActors[j] = temp;
+            }
+        }
+    }
+
+    // Display actors
+    cout << "Actors aged between " << x << " and " << y << " (in ascending order of age):" << endl;
+    for (const Actor* actor : filteredActors) {
+        cout << "Name: " << actor->name << ", Age: " << (currentYear - actor->birthYear) << endl;
+    }
+}
+
+
+
+
+
 int main() {
     // Load data from CSV files
     loadActorsFromCSV("../actors.csv");
     loadMoviesFromCSV("../movies.csv");
     loadCastsFromCSV("../cast.csv");
-
 
     while (true) {
         mainMenu();
@@ -340,6 +444,7 @@ int main() {
         cin >> choice;
 
         if (choice == 1) {
+            // Admin Features
             while (true) {
                 adminMenu();
 
@@ -368,11 +473,54 @@ int main() {
             }
         }
         else if (choice == 2) {
-            cout << "User features are under development.\n";
+            // User Features
+            while (true) {
+                userMenu();
+
+                int userChoice;
+                cin >> userChoice;
+
+                if (userChoice == 6) {
+                    cout << "Returning to Main Menu...\n";
+                    break;
+                }
+
+                switch (userChoice) {
+                case 1: {
+                    // Feature E: Display actors between a certain age
+                    displayActorsByAgeRange();
+                    break;
+                }
+                case 2: {
+                    // Feature F: Display movies made within the past 3 years
+                    displayRecentMovies();
+                    break;
+                }
+
+                case 3: {
+                    // Feature G: Display all movies an actor starred in
+                    cout << "Feature G is under development.\n";
+                }
+
+                case 4:{
+                    // Feature H: Display all the actors in a particular movie
+                    cout << "Feature H is under development.\n";
+                }
+               
+                case 5: {
+                    // Feature I: Display list of actors a particular actor knows
+                    cout << "Feature I is under development.\n";
+                }
+                
+                default:
+                    cout << "Invalid input, please try again.\n";
+                }
+            }
         }
         else {
             cout << "Invalid input, please try again.\n";
         }
     }
 }
+
 

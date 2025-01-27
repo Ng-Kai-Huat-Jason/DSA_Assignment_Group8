@@ -1,6 +1,7 @@
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 
+#include <vector>
 #include <string>
 #include <iostream>
 using namespace std;
@@ -33,8 +34,9 @@ public:
     ValueType* get(KeyType key);
     bool isEmpty() const;
     int getSize() const;
-
     void print() const;
+
+    std::vector<ValueType*> getAllItems() const;
 };
 
 #endif // DICTIONARY_H
