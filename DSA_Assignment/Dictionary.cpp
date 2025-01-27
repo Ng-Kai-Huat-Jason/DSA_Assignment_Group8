@@ -1,8 +1,33 @@
 #include "Dictionary.h"
+#include "Actor.h"
+#include "Movie.h"
+
+
+
+// Constructor
+template <typename KeyType, typename ValueType>
+Dictionary<KeyType, ValueType>::Dictionary() : size(0) {
+    for (int i = 0; i < MAX_SIZE; i++) {
+        table[i] = nullptr;
+    }
+}
+
+// Destructor
+template <typename KeyType, typename ValueType>
+Dictionary<KeyType, ValueType>::~Dictionary() {
+    for (int i = 0; i < MAX_SIZE; i++) {
+        Node<KeyType, ValueType>* current = table[i];
+        while (current) {
+            Node<KeyType, ValueType>* toDelete = current;
+            current = current->next;
+            delete toDelete;
+        }
+    }
+}
 
 // Hash function
-template <typename KeyType, typename ItemType>
-int Dictionary<KeyType, ItemType>::hash(KeyType key) const {
+template <typename KeyType, typename ValueType>
+int Dictionary<KeyType, ValueType>::hash(KeyType key) const {
     int hashValue = 0;
     for (char ch : key) {
         hashValue = (hashValue * 31 + ch) % MAX_SIZE;
@@ -10,44 +35,23 @@ int Dictionary<KeyType, ItemType>::hash(KeyType key) const {
     return hashValue;
 }
 
-// Constructor
-template <typename KeyType, typename ItemType>
-Dictionary<KeyType, ItemType>::Dictionary() : size(0) {
-    for (int i = 0; i < MAX_SIZE; i++) {
-        items[i] = nullptr;
-    }
-}
-
-// Destructor
-template <typename KeyType, typename ItemType>
-Dictionary<KeyType, ItemType>::~Dictionary() {
-    for (int i = 0; i < MAX_SIZE; i++) {
-        Node<KeyType, ItemType>* current = items[i];
-        while (current) {
-            Node<KeyType, ItemType>* temp = current;
-            current = current->next;
-            delete temp;
-        }
-    }
-}
-
-// Add a new item
-template <typename KeyType, typename ItemType>
-bool Dictionary<KeyType, ItemType>::add(KeyType newKey, ItemType newItem) {
-    int index = hash(newKey);
-
-    Node<KeyType, ItemType>* newNode = new Node<KeyType, ItemType>{ newKey, newItem, items[index] };
-    items[index] = newNode;
+// Add an item
+template <typename KeyType, typename ValueType>
+bool Dictionary<KeyType, ValueType>::add(KeyType key, ValueType* value) {
+    int index = hash(key);
+    Node<KeyType, ValueType>* newNode = new Node<KeyType, ValueType>(key, value);
+    newNode->next = table[index];
+    table[index] = newNode;
     size++;
     return true;
 }
 
 // Remove an item
-template <typename KeyType, typename ItemType>
-bool Dictionary<KeyType, ItemType>::remove(KeyType key) {
+template <typename KeyType, typename ValueType>
+bool Dictionary<KeyType, ValueType>::remove(KeyType key) {
     int index = hash(key);
-    Node<KeyType, ItemType>* current = items[index];
-    Node<KeyType, ItemType>* prev = nullptr;
+    Node<KeyType, ValueType>* current = table[index];
+    Node<KeyType, ValueType>* prev = nullptr;
 
     while (current) {
         if (current->key == key) {
@@ -55,7 +59,7 @@ bool Dictionary<KeyType, ItemType>::remove(KeyType key) {
                 prev->next = current->next;
             }
             else {
-                items[index] = current->next;
+                table[index] = current->next;
             }
             delete current;
             size--;
@@ -68,45 +72,42 @@ bool Dictionary<KeyType, ItemType>::remove(KeyType key) {
 }
 
 // Get an item
-template <typename KeyType, typename ItemType>
-ItemType* Dictionary<KeyType, ItemType>::get(KeyType key) {
+template <typename KeyType, typename ValueType>
+ValueType* Dictionary<KeyType, ValueType>::get(KeyType key) {
     int index = hash(key);
-    Node<KeyType, ItemType>* current = items[index];
-
+    Node<KeyType, ValueType>* current = table[index];
     while (current) {
         if (current->key == key) {
-            return &current->item;
+            return current->value;
         }
         current = current->next;
     }
     return nullptr;
 }
 
-// Check if the dictionary is empty
-template <typename KeyType, typename ItemType>
-bool Dictionary<KeyType, ItemType>::isEmpty() const {
+// Check if empty
+template <typename KeyType, typename ValueType>
+bool Dictionary<KeyType, ValueType>::isEmpty() const {
     return size == 0;
 }
 
-// Get the number of items
-template <typename KeyType, typename ItemType>
-int Dictionary<KeyType, ItemType>::getLength() const {
+// Get size
+template <typename KeyType, typename ValueType>
+int Dictionary<KeyType, ValueType>::getSize() const {
     return size;
 }
 
-// Print all items
-template <typename KeyType, typename ItemType>
-void Dictionary<KeyType, ItemType>::print() const {
+// Print the dictionary
+template <typename KeyType, typename ValueType>
+void Dictionary<KeyType, ValueType>::print() const {
     for (int i = 0; i < MAX_SIZE; i++) {
-        Node<KeyType, ItemType>* current = items[i];
+        Node<KeyType, ValueType>* current = table[i];
         while (current) {
-            cout << "Key: " << current->key << ", Item: " << endl;
+            cout << "Key: " << current->key << ", Value: (Address: " << current->value << ")" << endl;
             current = current->next;
         }
     }
 }
 
-// Explicit template instantiations for Actor, Movie, and Cast
 template class Dictionary<string, Actor>;
 template class Dictionary<string, Movie>;
-template class Dictionary<string, Cast>;
