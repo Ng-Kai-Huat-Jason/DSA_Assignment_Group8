@@ -237,6 +237,10 @@ void addActor() {
     // Add to AVL Tree
     actorAVLTree.insert(newActor);
     cout << "Actor added to AVL Tree successfully!\n";
+
+    // Add actor to graph
+    actorMovieGraph.addNode(name);
+    cout << "Actor added to graph successfully!\n";
 }
 
 
@@ -269,6 +273,10 @@ void addMovie() {
     // Add to AVL Tree
     movieAVLTree.insert(newMovie);
     cout << "Movie added to AVL Tree successfully!\n";
+
+    // Add movie to graph
+    actorMovieGraph.addNode(title);
+    cout << "Movie added to graph successfully!\n";
 }
 
 
@@ -289,7 +297,8 @@ void addActorToMovie() {
         movie->addActor(actor);
 
         // Update Graph
-        actorMovieGraph.addEdge(actorId, movieId);
+        actorMovieGraph.addEdge(actor->name, movie->title);
+        actorMovieGraph.addEdge(movie->title, actor->name);
 
         cout << "Actor added to Movie and Graph successfully!\n";
     }
@@ -449,12 +458,14 @@ void getMoviesByActor() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     getline(cin, actorName);
 
+    // Check if the actor exists in the graph
     int actorIndex = actorMovieGraph.getNodeIndex(actorName);
     if (actorIndex == -1) {
         cout << "\nActor \"" << actorName << "\" not found." << endl;
         return;
     }
 
+    // Retrieve the movies for the actor 
     vector<string> movies = actorMovieGraph.getNeighbors(actorName);
 
     if (movies.empty()) {
@@ -499,8 +510,6 @@ void getActorsByMovie() {
 }
 
 
-
-
 int main() {
     // Load data from CSV files
     loadActorsFromCSV("../actors.csv");
@@ -521,23 +530,29 @@ int main() {
                 int adminChoice;
                 cin >> adminChoice;
 
-                if (adminChoice == 1) {
-                    addActor();
-                }
-                else if (adminChoice == 2) {
-                    addMovie();
-                }
-                else if (adminChoice == 3) {
-                    addActorToMovie();
-                }
-                else if (adminChoice == 4) {
-                    updateDetails();
-                }
-                else if (adminChoice == 5) {
+                if (adminChoice == 5) {
                     cout << "Returning to Main Menu...\n";
                     break;
                 }
-                else {
+
+                switch (adminChoice) {
+                case 1: {
+                    addActor();
+                    break;
+                }
+                case 2: {
+                    addMovie();
+                    break;
+                }
+                case 3: {
+                    addActorToMovie();
+                    break;
+                }
+                case 4: {
+                    updateDetails();
+                    break;
+                }
+                default : 
                     cout << "Invalid input, please try again.\n";
                 }
             }
