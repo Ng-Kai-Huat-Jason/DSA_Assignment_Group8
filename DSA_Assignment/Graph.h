@@ -8,7 +8,8 @@ using namespace std;
 template <typename T>
 class Graph {
 private:
-    vector<vector<int>> adjList; // Adjacency list using a vector of vectors
+    int count;
+    vector<vector<int>> adjacencyMatrix; // Adjacency matrix using a vector of vectors
     vector<T> nodes;            // Mapping indices to nodes
 
     int getNodeIndex(const T& node);
@@ -17,9 +18,9 @@ public:
     Graph() {}
 
     void addNode(const T& node);
-    void addEdge(const T& source, const T& destination);
+    void addEdge (const T& source, const T& destination);
     vector<T> getNeighbors(const T& node);
-    void printGraph() const;
+    void displayMatrix() const;
 };
 
 #endif // GRAPH_H

@@ -2,8 +2,6 @@
 #include "Actor.h"
 #include "Movie.h"
 
-
-
 // Constructor
 template <typename KeyType, typename ValueType>
 Dictionary<KeyType, ValueType>::Dictionary() : size(0) {
@@ -109,5 +107,20 @@ void Dictionary<KeyType, ValueType>::print() const {
     }
 }
 
+// Retrieve all items as a vector
+template <typename KeyType, typename ValueType>
+std::vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
+    std::vector<ValueType*> items;
+    for (int i = 0; i < MAX_SIZE; ++i) {
+        Node<KeyType, ValueType>* current = table[i];
+        while (current) {
+            items.push_back(current->value);
+            current = current->next;
+        }
+    }
+    return items;
+}
+
+// Explicit template instantiation
 template class Dictionary<string, Actor>;
 template class Dictionary<string, Movie>;

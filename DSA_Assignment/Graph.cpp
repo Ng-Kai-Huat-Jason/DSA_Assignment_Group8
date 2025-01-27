@@ -3,10 +3,9 @@
 // Get the index of a node in the nodes vector
 template <typename T>
 int Graph<T>::getNodeIndex(const T& node) {
-    for (int i = 0; i < nodes.size(); ++i) {
-        if (nodes[i] == node) {
-            return i;
-        }
+    auto it = find(nodes.begin(), nodes.end(), node);
+    if (it != nodes.end()) {
+        return distance(nodes.begin(), it);
     }
     return -1; // Node not found
 }
@@ -16,7 +15,7 @@ template <typename T>
 void Graph<T>::addNode(const T& node) {
     if (getNodeIndex(node) == -1) { // Avoid duplicates
         nodes.push_back(node);
-        adjList.push_back({});
+        adjacencyMatrix.push_back({});
     }
 }
 
@@ -31,8 +30,8 @@ void Graph<T>::addEdge(const T& source, const T& destination) {
         return;
     }
 
-    adjList[srcIndex].push_back(destIndex);
-    adjList[destIndex].push_back(srcIndex); // For undirected graph
+    adjacencyMatrix[srcIndex][destIndex] == 1;
+    cout << "Linked actor \"" << source << "\" to movie \"" destination << "\"\n";
 }
 
 // Get neighbors of a node
@@ -45,19 +44,20 @@ vector<T> Graph<T>::getNeighbors(const T& node) {
     }
 
     vector<T> neighbors;
-    for (int neighborIndex : adjList[nodeIndex]) {
-        neighbors.push_back(nodes[neighborIndex]);
+    for (int i = 0; i < count; ++i) {
+        if (adjacencyMatrix[1][nodeIndex] == 1) {
+            neighbors.push_back(nodes[i]);
+        }
     }
     return neighbors;
 }
 
 // Print the graph
 template <typename T>
-void Graph<T>::printGraph() const {
-    for (int i = 0; i < nodes.size(); ++i) {
-        cout << nodes[i] << ": ";
-        for (int neighborIndex : adjList[i]) {
-            cout << nodes[neighborIndex] << " ";
+void Graph<T>::displayMatrix() const {
+    for (const auto& row : adjacencyMatrix) {
+        for (int value : row) {
+            cout << value << " ";
         }
         cout << endl;
     }
