@@ -199,7 +199,6 @@ void loadCastsFromCSV(const string& fileName) {
         // Add edge between actor and movie
         if (actor && movie) {
             actorMovieGraph.addEdge(actor->name, movie->title);
-            actorMovieGraph.addEdge(movie->title, actor->name);
         }
         else {
             cout << "Error: One or both nodes not found in the graph! (" << actorId << ", " << movieId << ")" << endl;
@@ -298,7 +297,6 @@ void addActorToMovie() {
 
         // Update Graph
         actorMovieGraph.addEdge(actor->name, movie->title);
-        actorMovieGraph.addEdge(movie->title, actor->name);
 
         cout << "Actor added to Movie and Graph successfully!\n";
     }
@@ -509,6 +507,9 @@ void getActorsByMovie() {
     }
 }
 
+void displayKnownActors() {
+
+}
 
 int main() {
     // Load data from CSV files
@@ -596,7 +597,8 @@ int main() {
                
                 case 5: {
                     // Feature I: Display list of actors a particular actor knows
-                    cout << "Feature I is under development.\n";
+                    displayKnownActors();
+                    break;
                 }
                 
                 default:

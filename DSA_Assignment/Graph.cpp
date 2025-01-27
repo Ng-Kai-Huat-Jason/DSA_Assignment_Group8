@@ -55,6 +55,7 @@ void Graph<T>::addEdge(const T& source, const T& destination) {
     }
 
     adjacencyMatrix[srcIndex][destIndex] = 1;
+    adjacencyMatrix[destIndex][srcIndex] = 1;
 }
 
 
