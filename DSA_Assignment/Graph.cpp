@@ -90,5 +90,57 @@ void Graph<T>::displayMatrix() const {
     }
 }
 
+// BFS
+template <typename T>
+void Graph<T>::bfs(const T& startNode) {
+    int startIndex = getNodeIndex(startNode);
+    if (startIndex == -1) {
+        cout << "Actor \"" << startNode << "\" does not exist in the graph." << endl;
+        return;
+    }
+
+    // Initialize visited array and parent tracking
+    vector<bool> visited(nodes.size(), false);
+    vector<int> parent(nodes.size(), -1); // Tracks the parent node index
+    vector<int> toVisit;                 // List to process nodes (acts like a queue)
+    toVisit.push_back(startIndex);
+    visited[startIndex] = true;
+
+    //Display the actor's movies and co-actors
+    cout << startNode << " starred in:\n";
+    vector<T> movies = getNeighbors(startNode);
+    for (const T& movie : movies) {
+        cout << " \n - " << movie << ":\n";
+        vector<T> coActors = getNeighbors(movie);
+        for (const T& coActor : coActors) {
+            if (coActor != startNode) {
+                cout << "    * " << coActor << "\n";
+            }
+        }
+    }
+
+    //Display the co-actors' co-actors (second-level connections)
+    cout << "\n" << startNode << " knows the following actors:\n";
+    for (const T& movie : movies) {
+        vector<T> coActors = getNeighbors(movie);
+        for (const T& coActor : coActors) {
+            if (coActor != startNode) {
+                cout << " \n - " << coActor << " starred in:\n";
+                vector<T> coActorMovies = getNeighbors(coActor);
+                for (const T& coActorMovie : coActorMovies) {
+                    vector<T> secondLevelCoActors = getNeighbors(coActorMovie);
+                    cout << "    * In movie \"" << coActorMovie << "\":\n";
+                    for (const T& secondLevelCoActor : secondLevelCoActors) {
+                        if (secondLevelCoActor != coActor && secondLevelCoActor != startNode) {
+                            cout << "      - " << secondLevelCoActor << "\n";
+                        }
+                    }
+                }
+            }
+        }
+    }
+    cout << endl;
+}
+
 // Explicit template instantiation
 template class Graph<string>;

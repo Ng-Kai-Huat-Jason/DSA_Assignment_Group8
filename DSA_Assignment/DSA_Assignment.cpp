@@ -508,8 +508,21 @@ void getActorsByMovie() {
 }
 
 void displayKnownActors() {
+    string actorName;
+    cout << "Enter actor name: ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear any leftover input
+    getline(cin, actorName);
 
+    // Check if actor exists in the graph
+    if (!actorMovieGraph.nodeExists(actorName)) {
+        cout << "Actor not found" << endl;
+        return;
+    }
+
+    // Call BFS with the actor's name
+    actorMovieGraph.bfs(actorName);
 }
+
 
 int main() {
     // Load data from CSV files
