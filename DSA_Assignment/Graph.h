@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <iostream>
+#include "Actor.h"
+#include "Movie.h"
+
 using namespace std;
 
 template <typename T>
@@ -20,6 +23,7 @@ public:
     void addEdge (const T& source, const T& destination);
     vector<T> getNeighbors(const T& node);
     void displayMatrix() const;
+    void bfs(const T& startNode);
 };
 
 #endif // GRAPH_H
