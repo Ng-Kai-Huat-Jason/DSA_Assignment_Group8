@@ -14,7 +14,6 @@ using namespace std;
 #include "Graph.h"
 #include <fstream>
 #include <sstream>
-#include <algorithm> // For sorting
 #include <ctime>     // For getting the current year dynamically
 
 // Data structures for actors and movies
@@ -65,68 +64,72 @@ void userMenu() {
 
 // CSV Functions 
 // Function to load actors from CSV
-void loadActorsFromCSV(const string& fileName) {
-    ifstream file(fileName);
+void loadActorsFromCSV(const std::string& fileName) {
+    std::ifstream file(fileName);
     if (!file.is_open()) {
-        cout << "Failed to open " << fileName << endl;
+        std::cerr << "Failed to open " << fileName << std::endl;
         return;
     }
 
-    string line;
+    std::string line;
+    std::getline(file, line); // Skip header row
 
-    // Skip the header row
-    getline(file, line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string id, name, birthYearStr;
 
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string id, name, birthYearStr;
-        int birthYear;
+        // Read values
+        std::getline(ss, id, ',');
+        std::getline(ss, name, ',');
+        std::getline(ss, birthYearStr, ',');
 
-        getline(ss, id, ',');
-        getline(ss, name, ',');
-        getline(ss, birthYearStr, ',');
+        // Remove surrounding quotes, if any
+        if (!name.empty() && name.front() == '"') name.erase(0, 1);
+        if (!name.empty() && name.back() == '"') name.erase(name.size() - 1);
 
-        // remove leading and trailing quotes if present
-        if (!name.empty() && name.front() == '"') {
-            name.erase(0, 1); // Remove leading quote
-        }
-
-        if (!name.empty() && name.back() == '"') {
-            name.erase(name.size() - 1); // Remove trailing quotes
-        }
-
-        // Validate and parse birthYear
         try {
-            birthYear = stoi(birthYearStr);
-        }
-        catch (const invalid_argument& e) {
-            cout << "Invalid birth year for actor ID: " << id << endl;
-            continue; // Skip this row
-        }
+            // Validate and parse birthYear
+            int birthYear = std::stoi(birthYearStr);
 
-        Actor* newActor = new Actor(id, name, birthYear);
+            // Create new Actor
+            Actor* newActor = new Actor(id, name, birthYear);
 
-        // Add actor to Dictionary and AVL Tree
-        actorDictionary.add(id, newActor);
-        actorAVLTree.insert(newActor);
+            // Validate and add to Dictionary
+            if (!id.empty() && !name.empty() && birthYear > 0) {
+                if (!actorDictionary.add(id, newActor)) {
+                    std::cerr << "Duplicate actor ID: " << id << std::endl;
+                    delete newActor;
+                }
+            }
+            else {
+                std::cerr << "Invalid data for actor: " << line << std::endl;
+                delete newActor;
+            }
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Error parsing actor data: " << line << " (" << e.what() << ")" << std::endl;
+        }
     }
 
     file.close();
-    cout << "Actors loaded successfully from " << fileName << endl;
+    std::cout << "Actors loaded successfully from " << fileName << std::endl;
 }
+
+
+
 
 
 // Function to load movies from CSV
 void loadMoviesFromCSV(const string& fileName) {
     ifstream file(fileName);
     if (!file.is_open()) {
-        cout << "Failed to open " << fileName << endl;
+        cout << "Error: Failed to open " << fileName << endl;
         return;
     }
 
     string line;
 
-    // Skip the header row
+    // Skip the first line (header)
     getline(file, line);
 
     while (getline(file, line)) {
@@ -139,20 +142,34 @@ void loadMoviesFromCSV(const string& fileName) {
         getline(ss, plot, ',');
         getline(ss, yearStr, ',');
 
-        // Validate and parse year
+        // Remove leading/trailing spaces or quotes
+        if (!title.empty() && title.front() == '"') title.erase(0, 1);
+        if (!title.empty() && title.back() == '"') title.erase(title.size() - 1);
+        if (!plot.empty() && plot.front() == '"') plot.erase(0, 1);
+        if (!plot.empty() && plot.back() == '"') plot.erase(plot.size() - 1);
+
+        // Validate input
+        if (id.empty() || title.empty() || yearStr.empty()) {
+            cout << "Warning: Skipping invalid movie record: " << line << endl;
+            continue;
+        }
+
         try {
             year = stoi(yearStr);
         }
-        catch (const invalid_argument& e) {
-            cout << "Invalid year for movie ID: " << id << endl;
-            continue; // Skip this row
+        catch (const invalid_argument&) {
+            cout << "Warning: Invalid year for movie ID " << id << ". Skipping record.\n";
+            continue;
         }
 
         Movie* newMovie = new Movie(id, title, plot, year);
 
-        // Add movie to Dictionary and AVL Tree
-        movieDictionary.add(id, newMovie);
-        movieAVLTree.insert(newMovie);
+        if (!movieDictionary.add(id, newMovie)) {
+            delete newMovie; // Prevent memory leak if already exists
+        }
+        else {
+            movieAVLTree.insert(newMovie);
+        }
     }
 
     file.close();
@@ -160,17 +177,19 @@ void loadMoviesFromCSV(const string& fileName) {
 }
 
 
+
+
 // Function to load cast relationships from CSV
 void loadCastsFromCSV(const string& fileName) {
     ifstream file(fileName);
     if (!file.is_open()) {
-        cout << "Failed to open " << fileName << endl;
+        cout << "Error: Failed to open " << fileName << endl;
         return;
     }
 
     string line;
 
-    // Skip the header row
+    // Skip the first line (header)
     getline(file, line);
 
     while (getline(file, line)) {
@@ -180,34 +199,41 @@ void loadCastsFromCSV(const string& fileName) {
         getline(ss, actorId, ',');
         getline(ss, movieId, ',');
 
-        // Ensure actor exists in the graph by name
+        // Validate input
+        if (actorId.empty() || movieId.empty()) {
+            cout << "Warning: Skipping invalid cast record: " << line << endl;
+            continue;
+        }
+
+        // Check if actor and movie exist in the dictionaries
         Actor* actor = actorDictionary.get(actorId);
-        if (actor) {
-            if (!actorMovieGraph.nodeExists(actor->name)) {
-                actorMovieGraph.addNode(actor->name);
-            }
-        }
-
-        // Ensure movie exists in the graph
         Movie* movie = movieDictionary.get(movieId);
-        if (movie) {
-            if (!actorMovieGraph.nodeExists(movie->title)) {
-                actorMovieGraph.addNode(movie->title);
-            }
+
+        if (!actor || !movie) {
+            cout << "Warning: Actor or Movie not found for IDs (" << actorId << ", " << movieId << "). Skipping record.\n";
+            continue;
         }
 
-        // Add edge between actor and movie
-        if (actor && movie) {
-            actorMovieGraph.addEdge(actor->name, movie->title);
+        // Add actor-movie relationship
+        actor->addMovie(movie);
+        movie->addActor(actor);
+
+        // Ensure both actor and movie exist in the graph
+        if (!actorMovieGraph.nodeExists(actor->name)) {
+            actorMovieGraph.addNode(actor->name);
         }
-        else {
-            cout << "Error: One or both nodes not found in the graph! (" << actorId << ", " << movieId << ")" << endl;
+        if (!actorMovieGraph.nodeExists(movie->title)) {
+            actorMovieGraph.addNode(movie->title);
         }
+
+        // Add edge to the graph
+        actorMovieGraph.addEdge(actor->name, movie->title);
     }
 
     file.close();
     cout << "Casts loaded successfully from " << fileName << endl;
 }
+
 
 
 // Function to handle adding a new actor
@@ -384,11 +410,9 @@ void displayRecentMovies() {
         }
     }
 
-    // Sort movies by year in ascending order
     for (size_t i = 0; i < recentMovies.size(); ++i) {
         for (size_t j = i + 1; j < recentMovies.size(); ++j) {
             if (recentMovies[i]->year > recentMovies[j]->year) {
-                // Swap movies
                 Movie* temp = recentMovies[i];
                 recentMovies[i] = recentMovies[j];
                 recentMovies[j] = temp;
@@ -402,6 +426,7 @@ void displayRecentMovies() {
         cout << "Title: " << movie->title << ", Year: " << movie->year << ", Plot: " << movie->plot << endl;
     }
 }
+
 
 void displayActorsByAgeRange() {
     int x, y;
@@ -497,8 +522,13 @@ void getActorsByMovie() {
         cout << "\nNo actors found for the movie \"" << movieTitle << "\"." << endl;
     }
     else {
-        // Sort actors alphabetically
-        sort(actors.begin(), actors.end());
+        for (size_t i = 0; i < actors.size(); ++i) {
+            for (size_t j = i + 1; j < actors.size(); ++j) {
+                if (actors[i] > actors[j]) {
+                    swap(actors[i], actors[j]);
+                }
+            }
+        }
 
         cout << "\nActors in \"" << movieTitle << "\":" << endl;
         for (const auto& actor : actors) {
@@ -506,6 +536,7 @@ void getActorsByMovie() {
         }
     }
 }
+
 
 void displayKnownActors() {
     string actorName;
@@ -551,18 +582,22 @@ int main() {
 
                 switch (adminChoice) {
                 case 1: {
+					// Feature A : Add new actor
                     addActor();
                     break;
                 }
                 case 2: {
+					// Feature B : Add new movie
                     addMovie();
                     break;
                 }
                 case 3: {
+					// Feature C : Add an actor to a movie
                     addActorToMovie();
                     break;
                 }
                 case 4: {
+					// Feature D : Update actor/movie details
                     updateDetails();
                     break;
                 }
