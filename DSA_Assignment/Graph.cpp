@@ -34,6 +34,22 @@ void Graph<T>::addNode(const T& node) {
     }
 }
 
+// Remove a node from the graph
+template <typename T>
+void Graph<T>::removeNode(const T& node) {
+    int nodeIndex = getNodeIndex(node);
+    if (nodeIndex == -1) return; // Node not found
+
+    // Remove from nodes vector
+    nodes.erase(nodes.begin() + nodeIndex);
+
+    // Remove from adjacency matrix
+    adjacencyMatrix.erase(adjacencyMatrix.begin() + nodeIndex);
+    for (auto& row : adjacencyMatrix) {
+        row.erase(row.begin() + nodeIndex);
+    }
+}
+
 
 // Add an edge to the graph
 template <typename T>

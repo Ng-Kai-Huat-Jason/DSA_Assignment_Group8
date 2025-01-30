@@ -347,6 +347,8 @@ void updateDetails() {
 
         Actor* actor = actorDictionary.get(actorId);
         if (actor) {
+            string oldName = actor->name; // Store old name
+
             cout << "Enter new Name (current: " << actor->name << "): ";
             cin.ignore();
             getline(cin, actor->name);
@@ -355,8 +357,19 @@ void updateDetails() {
 
             cout << "Actor details updated successfully!\n";
 
-            // Re-insert into AVL Tree to maintain order
+            // Update AVL Tree
             actorAVLTree.insert(actor);
+
+            // Update Graph if name changed
+            if (oldName != actor->name) {
+                actorMovieGraph.removeNode(oldName);      // Remove old node
+                actorMovieGraph.addNode(actor->name);     // Add new node
+
+                // Reconnect edges
+                for (Movie* movie : actor->movies) {
+                    actorMovieGraph.addEdge(actor->name, movie->title);
+                }
+            }
         }
         else {
             cout << "Actor not found.\n";
@@ -370,6 +383,8 @@ void updateDetails() {
 
         Movie* movie = movieDictionary.get(movieId);
         if (movie) {
+            string oldTitle = movie->title; // Store old title
+
             cout << "Enter new Title (current: " << movie->title << "): ";
             cin.ignore();
             getline(cin, movie->title);
@@ -380,8 +395,19 @@ void updateDetails() {
 
             cout << "Movie details updated successfully!\n";
 
-            // Re-insert into AVL Tree to maintain order
+            // Update AVL Tree
             movieAVLTree.insert(movie);
+
+            // Update Graph if title changed
+            if (oldTitle != movie->title) {
+                actorMovieGraph.removeNode(oldTitle);      // Remove old node
+                actorMovieGraph.addNode(movie->title);     // Add new node
+
+                // Reconnect edges
+                for (Actor* actor : movie->actors) {
+                    actorMovieGraph.addEdge(actor->name, movie->title);
+                }
+            }
         }
         else {
             cout << "Movie not found.\n";
@@ -391,6 +417,7 @@ void updateDetails() {
         cout << "Invalid choice.\n";
     }
 }
+
 
 void displayRecentMovies() {
     // Get the current year
