@@ -1,4 +1,3 @@
-// Dictionary.h
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 
@@ -31,7 +30,6 @@ private:
     Node<KeyType, ValueType>* table[MAX_SIZE];
     int size;
 
-
     unsigned long hash(const KeyType& key) const;
 
 public:
@@ -45,7 +43,11 @@ public:
     int getSize() const;
     void print() const;
 
+    // Returns a vector of ValueType* (existing method)
     vector<ValueType*> getAllItems() const;
+
+    // New: Returns a vector of Node pointers (each containing both key and value)
+    vector<Node<KeyType, ValueType>*> getAllNodes() const;
 };
 
 #endif // DICTIONARY_H

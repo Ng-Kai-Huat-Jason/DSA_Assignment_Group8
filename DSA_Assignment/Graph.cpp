@@ -18,6 +18,7 @@ int Graph<T>::getNodeIndex(const T& node) {
 }
 
 
+
 // Add a new node to the graph
 template <typename T>
 void Graph<T>::addNode(const T& node) {
@@ -156,6 +157,7 @@ void Graph<T>::bfs(const T& startNode) {
         }
     }
     cout << endl;
+
 }
 
 // Explicit template instantiation
