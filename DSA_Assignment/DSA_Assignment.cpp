@@ -231,7 +231,84 @@ void loadCastsFromCSV(const string& fileName) {
 // CSV Functons to store data and update
 //------------------------------//
 
-// Patch function for actors CSV: updates only changed records.
+// Append new actor, movie, and cast records to their CSV files.
+void appendNewDataToCsv() {
+    // Append new actors
+    {
+        string filename = "../actors.csv";
+        ofstream outFile;
+        // If the file doesn't exist, create it and write a header.
+        if (!fileExists(filename)) {
+            outFile.open(filename, ios::out);
+            if (outFile.is_open()) {
+                outFile << "ActorID,Name,BirthYear\n";
+                outFile.close();
+            }
+        }
+        outFile.open(filename, ios::app);
+        if (outFile.is_open()) {
+            for (const Actor* actor : newActors) {
+                outFile << actor->id << "," << actor->name << "," << actor->birthYear << "\n";
+            }
+            outFile.close();
+            cout << "[Info] New actors appended successfully.\n";
+        }
+        else {
+            cout << "[Error] Unable to open " << filename << " for appending new actors.\n";
+        }
+    }
+
+    // Append new movies
+    {
+        string filename = "../movies.csv";
+        ofstream outFile;
+        if (!fileExists(filename)) {
+            outFile.open(filename, ios::out);
+            if (outFile.is_open()) {
+                outFile << "MovieID,Title,Plot,Year\n";
+                outFile.close();
+            }
+        }
+        outFile.open(filename, ios::app);
+        if (outFile.is_open()) {
+            for (const Movie* movie : newMovies) {
+                // Note: No extra quotes added.
+                outFile << movie->id << "," << movie->title << "," << movie->plot << "," << movie->year << "\n";
+            }
+            outFile.close();
+            cout << "[Info] New movies appended successfully.\n";
+        }
+        else {
+            cout << "[Error] Unable to open " << filename << " for appending new movies.\n";
+        }
+    }
+
+    // Append new cast relationships
+    {
+        string filename = "../cast.csv";
+        ofstream outFile;
+        if (!fileExists(filename)) {
+            outFile.open(filename, ios::out);
+            if (outFile.is_open()) {
+                outFile << "ActorID,MovieID\n";
+                outFile.close();
+            }
+        }
+        outFile.open(filename, ios::app);
+        if (outFile.is_open()) {
+            for (const auto& castPair : newCasts) {
+                outFile << castPair.first << "," << castPair.second << "\n";
+            }
+            outFile.close();
+            cout << "[Info] New cast relationships appended successfully.\n";
+        }
+        else {
+            cout << "[Error] Unable to open " << filename << " for appending new casts.\n";
+        }
+    }
+}
+
+// Patch (update) the actors CSV: update only changed records.
 void patchActorsCSV() {
     string filename = "../actors.csv";
     ifstream inFile(filename);
@@ -251,12 +328,9 @@ void patchActorsCSV() {
         id = trim(id);
         Actor* actor = actorDictionary.get(id);
         if (actor) {
-            // Build the updated line (fields without extra quotes)
-            string updatedLine = trim(actor->id) + "," + trim(actor->name) + "," + to_string(actor->birthYear);
-            if (updatedLine != line)
-                lines.push_back(updatedLine);
-            else
-                lines.push_back(line);
+            // Rebuild record line using current dictionary data.
+            string updatedLine = actor->id + "," + actor->name + "," + to_string(actor->birthYear);
+            lines.push_back(updatedLine);
         }
         else {
             lines.push_back(line);
@@ -265,7 +339,7 @@ void patchActorsCSV() {
     inFile.close();
     ofstream outFile(filename, ios::out);
     if (outFile.is_open()) {
-        for (const auto& l : lines)
+        for (const string& l : lines)
             outFile << l << "\n";
         outFile.close();
         cout << "[Info] Actors CSV patched successfully.\n";
@@ -275,7 +349,7 @@ void patchActorsCSV() {
     }
 }
 
-// Patch function for movies CSV: updates only changed records.
+// Patch (update) the movies CSV: update only changed records.
 void patchMoviesCSV() {
     string filename = "../movies.csv";
     ifstream inFile(filename);
@@ -295,12 +369,10 @@ void patchMoviesCSV() {
         id = trim(id);
         Movie* movie = movieDictionary.get(id);
         if (movie) {
-            // Build the updated line (fields without extra quotes)
-            string updatedLine = trim(movie->id) + "," + trim(movie->title) + "," + trim(movie->plot) + "," + trim(movie->year);
-            if (updatedLine != line)
-                lines.push_back(updatedLine);
-            else
-                lines.push_back(line);
+            // Rebuild record line using current dictionary data.
+            // Use movie->year as is (without trim) so the year digits are preserved.
+            string updatedLine = movie->id + "," + movie->title + "," + movie->plot + "," + movie->year;
+            lines.push_back(updatedLine);
         }
         else {
             lines.push_back(line);
@@ -309,7 +381,7 @@ void patchMoviesCSV() {
     inFile.close();
     ofstream outFile(filename, ios::out);
     if (outFile.is_open()) {
-        for (const auto& l : lines)
+        for (const string& l : lines)
             outFile << l << "\n";
         outFile.close();
         cout << "[Info] Movies CSV patched successfully.\n";
@@ -319,36 +391,13 @@ void patchMoviesCSV() {
     }
 }
 
-// Append new cast relationships to cast.csv.
-void appendNewCastsCSV() {
-    string filename = "../cast.csv";
-    // If the file doesn't exist, create it with a header.
-    if (!fileExists(filename)) {
-        ofstream createFile(filename, ios::out);
-        if (createFile.is_open()) {
-            createFile << "ActorID,MovieID\n";
-            createFile.close();
-        }
-    }
-    ofstream outFile(filename, ios::app);
-    if (outFile.is_open()) {
-        for (const auto& castPair : newCasts) {
-            outFile << trim(castPair.first) << "," << trim(castPair.second) << "\n";
-        }
-        outFile.close();
-        cout << "[Info] New cast relationships appended to cast.csv successfully.\n";
-    }
-    else {
-        cout << "[Error] Unable to open " << filename << " for appending.\n";
-    }
-}
 
 // Combined function to store (patch and append) all CSV data.
 void storeDataToCsv() {
     cout << "[Info] Storing data to CSV files...\n";
+	appendNewDataToCsv();
     patchActorsCSV();
     patchMoviesCSV();
-    appendNewCastsCSV();
     cout << "[Info] Data storage to CSV files completed.\n";
 }
 
