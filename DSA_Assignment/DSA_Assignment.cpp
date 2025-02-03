@@ -112,11 +112,50 @@ string getNonEmptyInput(const string& prompt) {
     }
 }
 
+// Helper function that parses a CSV line into fields while respecting quotes.
+vector<string> parseCSVLine(const string& line) {
+    vector<string> fields;
+    string current;
+    bool inQuotes = false;
+    for (size_t i = 0; i < line.size(); i++) {
+        char c = line[i];
+        if (c == '"') {
+            // If inside quotes and next character is also a quote, add a single quote.
+            if (inQuotes && i + 1 < line.size() && line[i + 1] == '"') {
+                current.push_back('"');
+                i++; // skip the next quote
+            }
+            else {
+                inQuotes = !inQuotes;
+            }
+        }
+        else if (c == ',' && !inQuotes) {
+            // Field delimiter found (and not inside quotes)
+            fields.push_back(current);
+            current.clear();
+        }
+        else {
+            current.push_back(c);
+        }
+    }
+    // Push the last field.
+    fields.push_back(current);
+
+    // Trim each field and remove surrounding quotes if present.
+    for (auto& field : fields) {
+        field = trim(field);
+        if (field.size() >= 2 && field.front() == '"' && field.back() == '"') {
+            field = field.substr(1, field.size() - 2);
+        }
+    }
+    return fields;
+}
+
 
 //CSV Functions to load from csv
 //======================//
 
-// Load actors from CSV into the dictionary.
+// Load actors from CSV 
 void loadActorsFromCSV(const string& fileName) {
     ifstream file(fileName);
     if (!file.is_open()) {
@@ -155,38 +194,49 @@ void loadActorsFromCSV(const string& fileName) {
     cout << "[Info] Actors loaded successfully from " << fileName << endl;
 }
 
-// Load movies from CSV into the dictionary.
+// Load movies from CSV 
 void loadMoviesFromCSV(const string& fileName) {
     ifstream file(fileName);
     if (!file.is_open()) {
         cout << "[Error] Failed to open " << fileName << endl;
         return;
     }
+
     string line;
-    getline(file, line); // Skip header
+    getline(file, line); // Skip header line
+
     while (getline(file, line)) {
-        stringstream ss(line);
-        string id, title, plot, yearStr;
-        getline(ss, id, ',');
-        getline(ss, title, ',');
-        getline(ss, plot, ',');
-        getline(ss, yearStr, ',');
-        id = trim(id);
-        title = trim(title);
-        plot = trim(plot);
-        yearStr = trim(yearStr);
+        if (line.empty())
+            continue;
+
+        // Use our custom CSV parser to split the line.
+        vector<string> fields = parseCSVLine(line);
+        // Expect at least four fields: id, title, plot, and year.
+        if (fields.size() < 4) {
+            cout << "[Warning] Skipping invalid movie record: " << line << endl;
+            continue;
+        }
+
+        string id = trim(fields[0]);
+        string title = trim(fields[1]);
+        string plot = trim(fields[2]);
+        string yearStr = trim(fields[3]);
+
         if (id.empty() || title.empty() || yearStr.empty()) {
             cout << "[Warning] Skipping invalid movie record: " << line << endl;
             continue;
         }
+
+        // Create the new Movie object.
         Movie* newMovie = new Movie(id, title, plot, yearStr);
         if (!movieDictionary.add(id, newMovie)) {
-            delete newMovie;
+            delete newMovie; // Prevent memory leak if already exists.
         }
         else {
             movieAVLTree.insert(newMovie);
         }
     }
+
     file.close();
     cout << "[Info] Movies loaded successfully from " << fileName << endl;
 }
