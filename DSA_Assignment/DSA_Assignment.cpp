@@ -68,6 +68,15 @@ void userMenu() {
     cout << "Enter your choice: ";
 }
 
+// Function to trim white spaces
+string trim(const string& str) {
+    size_t start = str.find_first_not_of(" \t");
+    size_t end = str.find_last_not_of(" \t");
+
+    return (start == string::npos || end == string::npos) ? "" : str.substr(start, end - start + 1);
+}
+
+
 // Function to get non-empty string input
 string getNonEmptyInput(const string& prompt) {
     string input;
@@ -258,14 +267,14 @@ void loadCastsFromCSV(const string& fileName) {
     cout << "[Info] Casts loaded successfully from " << fileName << endl;
 }
 
-// Function to write new entries to CSV files upon program termination
+// Function to write new entries to CSV files 
 void writeToCSV() {
     // Append new actors to actors.csv
     if (!newActors.empty()) {
         ofstream actorsFile("../actors.csv", ios::app);
         if (actorsFile.is_open()) {
             for (const Actor* actor : newActors) {
-                actorsFile << actor->id << ",\"" << actor->name << "\"," << actor->birthYear << "\n";
+                actorsFile << trim(actor->id) << "," << trim(actor->name) << "," << actor->birthYear << "\n";
             }
             actorsFile.close();
             cout << "[Info] New actors appended to actors.csv successfully.\n";
@@ -280,18 +289,7 @@ void writeToCSV() {
         ofstream moviesFile("../movies.csv", ios::app);
         if (moviesFile.is_open()) {
             for (const Movie* movie : newMovies) {
-                // Remove quotes from title and plot
-                string sanitizedTitle = movie->title;
-                string sanitizedPlot = movie->plot;
-
-                // Remove surrounding quotes
-                if (!sanitizedTitle.empty() && sanitizedTitle.front() == '"') sanitizedTitle.erase(0, 1);
-                if (!sanitizedTitle.empty() && sanitizedTitle.back() == '"') sanitizedTitle.erase(sanitizedTitle.size() - 1);
-
-                if (!sanitizedPlot.empty() && sanitizedPlot.front() == '"') sanitizedPlot.erase(0, 1);
-                if (!sanitizedPlot.empty() && sanitizedPlot.back() == '"') sanitizedPlot.erase(sanitizedPlot.size() - 1);
-
-                moviesFile << movie->id << "," << sanitizedTitle << "," << sanitizedPlot << "," << movie->year << "\n";
+                moviesFile << trim(movie->id) << "," << trim(movie->title) << "," << trim(movie->plot) << "," << movie->year << "\n";
             }
             moviesFile.close();
             cout << "[Info] New movies appended to movies.csv successfully.\n";
@@ -301,48 +299,113 @@ void writeToCSV() {
         }
     }
 
+    // Append new cast relationships to cast.csv
+    if (!newCasts.empty()) {
+        ofstream castFile("../cast.csv", ios::app);
+        if (castFile.is_open()) {
+            for (const auto& castPair : newCasts) {
+                castFile << trim(castPair.first) << "," << trim(castPair.second) << "\n";
+            }
+            castFile.close();
+            cout << "[Info] New cast relationships appended to cast.csv successfully.\n";
+        }
+        else {
+            cout << "[Error] Unable to open cast.csv for appending.\n";
+        }
+    }
+}
 
-    // Write new graph relationships to cast.csv
-    ofstream castFile("../cast.csv", ios::app);
-    if (castFile.is_open()) {
-        // Iterate only through the newly added cast relationships
-        for (const auto& castPair : newCasts) {
-            const string& actorId = castPair.first;
-            const string& movieId = castPair.second;
 
-            // Retrieve the actor and movie objects
-            Actor* actor = actorDictionary.get(actorId);
-            Movie* movie = movieDictionary.get(movieId);
+// Function to update existing entries in CSV files
+void patchToCSV() {
+    // Update actors.csv
+    ifstream inputFile("../actors.csv");
+    ofstream tempFile("../actors_temp.csv");
+    if (inputFile.is_open() && tempFile.is_open()) {
+        string line;
+        getline(inputFile, line); // Copy header
+        tempFile << line << "\n";
 
-            // Ensure both actor and movie exist
-            if (actor && movie) {
-                // Add nodes to graph if they don't already exist
-                if (!actorMovieGraph.nodeExists(actor->name)) {
-                    actorMovieGraph.addNode(actor->name);
-                }
-                if (!actorMovieGraph.nodeExists(movie->title)) {
-                    actorMovieGraph.addNode(movie->title);
-                }
+        while (getline(inputFile, line)) {
+            stringstream ss(line);
+            string id, name, birthYearStr;
+            getline(ss, id, ',');
+            getline(ss, name, ',');
+            getline(ss, birthYearStr, ',');
 
-                // Add the edge to the graph
-                actorMovieGraph.addEdge(actor->name, movie->title);
-
-                // Write to the CSV
-                castFile << actor->id << "," << movie->id << "\n";
+            // Check if the actor exists and has updated details
+            Actor* actor = actorDictionary.get(trim(id));
+            if (actor) {
+                tempFile << trim(actor->id) << "," << trim(actor->name) << "," << actor->birthYear << "\n";
             }
             else {
-                cout << "[Warning] Actor or Movie not found for IDs (" << actorId << ", " << movieId << "). Skipping record.\n";
+                tempFile << trim(line) << "\n"; // Copy original line if no updates
             }
         }
-        castFile.close();
-        cout << "[Info] New graph relationships appended to cast.csv successfully.\n";
+
+        inputFile.close();
+        tempFile.close();
+        remove("../actors.csv");
+        rename("../actors_temp.csv", "../actors.csv");
+        cout << "[Info] Actors CSV updated successfully.\n";
     }
     else {
-        cout << "[Error] Unable to open cast.csv for appending.\n";
+        cout << "[Error] Unable to open actors.csv for updating.\n";
     }
 
+    // Update movies.csv
+    inputFile.open("../movies.csv");
+    tempFile.open("../movies_temp.csv");
+    if (inputFile.is_open() && tempFile.is_open()) {
+        string line;
+        getline(inputFile, line); // Copy header
+        tempFile << line << "\n";
 
+        while (getline(inputFile, line)) {
+            stringstream ss(line);
+            string id, title, plot, yearStr;
+            getline(ss, id, ',');
+            getline(ss, title, ',');
+            getline(ss, plot, ',');
+            getline(ss, yearStr, ',');
+
+            // Check if the movie exists and has updated details
+            Movie* movie = movieDictionary.get(trim(id));
+            if (movie) {
+                tempFile << trim(movie->id) << "," << trim(movie->title) << "," << trim(movie->plot) << "," << movie->year << "\n";
+            }
+            else {
+                tempFile << trim(line) << "\n"; // Copy original line if no updates
+            }
+        }
+
+        inputFile.close();
+        tempFile.close();
+        remove("../movies.csv");
+        rename("../movies_temp.csv", "../movies.csv");
+        cout << "[Info] Movies CSV updated successfully.\n";
+    }
+    else {
+        cout << "[Error] Unable to open movies.csv for updating.\n";
+    }
 }
+
+// Helper to call both functions for CSV
+void storeDataToCsv() {
+    cout << "[Info] Storing data to CSV files...\n";
+
+    // Update existing data
+    patchToCSV();
+
+    // Append new data
+    writeToCSV();
+
+    cout << "[Info] Data storage to CSV files completed.\n";
+}
+
+
+
+
 
 // Assignemnt Features
 // Function to handle adding a new actor 
@@ -448,7 +511,7 @@ void addMovie() {
 }
 
 
-// Function to handle adding an actor to a movie 
+// Function to handle adding an actor to a movie
 void addActorToMovie() {
     string actorId, movieId;
 
@@ -462,6 +525,20 @@ void addActorToMovie() {
     Movie* movie = movieDictionary.get(movieId);
 
     if (actor && movie) {
+        // Check if the actor is already part of the cast of the movie
+        bool isAlreadyCast = false;
+        for (const Movie* m : actor->movies) {
+            if (m->id == movieId) {
+                isAlreadyCast = true;
+                break;
+            }
+        }
+
+        if (isAlreadyCast) {
+            cout << "[Error] Actor \"" << actor->name << "\" is already part of the cast for movie \"" << movie->title << "\".\n";
+            return;
+        }
+
         // Ensure both actor and movie exist in the graph
         if (!actorMovieGraph.nodeExists(actor->name)) {
             actorMovieGraph.addNode(actor->name);
@@ -473,6 +550,10 @@ void addActorToMovie() {
         // Add edge to the graph
         actorMovieGraph.addEdge(actor->name, movie->title);
 
+        // Add the actor-movie relationship
+        actor->addMovie(movie);
+        movie->addActor(actor);
+
         // Track the new cast relationship for appending to CSV
         newCasts.emplace_back(actorId, movieId);
 
@@ -483,6 +564,7 @@ void addActorToMovie() {
         cout << "[Error] Invalid Actor ID or Movie ID.\n";
     }
 }
+
 
 
 
@@ -929,10 +1011,11 @@ int main() {
                 }
             }
         }
-		else if (choice == 3) {
-			writeToCSV();
-			cout << "[Info] Data stored to CSV files successfully.\n";
-		}
+        else if (choice == 3) {
+            storeDataToCsv();
+            cout << "[Info] Data stored to CSV files successfully.\n";
+        }
+
         else {
             cout << "[Error] Invalid input, please try again.\n";
         }
