@@ -36,6 +36,7 @@ void mainMenu() {
     cout << "=====================================" << endl;
     cout << "(1) Enter as Admin" << endl;
     cout << "(2) Enter as User" << endl;
+	cout << "(3) Store updates to CSVs" << endl;
     cout << "=====================================" << endl;
     cout << "Enter your choice: ";
 }
@@ -279,15 +280,18 @@ void writeToCSV() {
         ofstream moviesFile("../movies.csv", ios::app);
         if (moviesFile.is_open()) {
             for (const Movie* movie : newMovies) {
-                // Handle quotes in plot by replacing any existing quotes with double quotes
+                // Remove quotes from title and plot
+                string sanitizedTitle = movie->title;
                 string sanitizedPlot = movie->plot;
-                size_t pos = 0;
-                while ((pos = sanitizedPlot.find("\"", pos)) != string::npos) {
-                    sanitizedPlot.replace(pos, 1, "\"\"");
-                    pos += 2; // Move past the escaped quotes
-                }
 
-                moviesFile << movie->id << ",\"" << movie->title << "\",\"" << sanitizedPlot << "\"," << movie->year << "\n";
+                // Remove surrounding quotes
+                if (!sanitizedTitle.empty() && sanitizedTitle.front() == '"') sanitizedTitle.erase(0, 1);
+                if (!sanitizedTitle.empty() && sanitizedTitle.back() == '"') sanitizedTitle.erase(sanitizedTitle.size() - 1);
+
+                if (!sanitizedPlot.empty() && sanitizedPlot.front() == '"') sanitizedPlot.erase(0, 1);
+                if (!sanitizedPlot.empty() && sanitizedPlot.back() == '"') sanitizedPlot.erase(sanitizedPlot.size() - 1);
+
+                moviesFile << movie->id << "," << sanitizedTitle << "," << sanitizedPlot << "," << movie->year << "\n";
             }
             moviesFile.close();
             cout << "[Info] New movies appended to movies.csv successfully.\n";
@@ -297,20 +301,47 @@ void writeToCSV() {
         }
     }
 
-    // Append new casts to cast.csv
-    if (!newCasts.empty()) {
-        ofstream castFile("../cast.csv", ios::app);
-        if (castFile.is_open()) {
-            for (const auto& cast : newCasts) {
-                castFile << cast.first << "," << cast.second << "\n";
+
+    // Write new graph relationships to cast.csv
+    ofstream castFile("../cast.csv", ios::app);
+    if (castFile.is_open()) {
+        // Iterate only through the newly added cast relationships
+        for (const auto& castPair : newCasts) {
+            const string& actorId = castPair.first;
+            const string& movieId = castPair.second;
+
+            // Retrieve the actor and movie objects
+            Actor* actor = actorDictionary.get(actorId);
+            Movie* movie = movieDictionary.get(movieId);
+
+            // Ensure both actor and movie exist
+            if (actor && movie) {
+                // Add nodes to graph if they don't already exist
+                if (!actorMovieGraph.nodeExists(actor->name)) {
+                    actorMovieGraph.addNode(actor->name);
+                }
+                if (!actorMovieGraph.nodeExists(movie->title)) {
+                    actorMovieGraph.addNode(movie->title);
+                }
+
+                // Add the edge to the graph
+                actorMovieGraph.addEdge(actor->name, movie->title);
+
+                // Write to the CSV
+                castFile << actor->id << "," << movie->id << "\n";
             }
-            castFile.close();
-            cout << "[Info] New cast relationships appended to cast.csv successfully.\n";
+            else {
+                cout << "[Warning] Actor or Movie not found for IDs (" << actorId << ", " << movieId << "). Skipping record.\n";
+            }
         }
-        else {
-            cout << "[Error] Unable to open cast.csv for appending.\n";
-        }
+        castFile.close();
+        cout << "[Info] New graph relationships appended to cast.csv successfully.\n";
     }
+    else {
+        cout << "[Error] Unable to open cast.csv for appending.\n";
+    }
+
+
 }
 
 // Assignemnt Features
@@ -431,24 +462,15 @@ void addActorToMovie() {
     Movie* movie = movieDictionary.get(movieId);
 
     if (actor && movie) {
-        // Check if the actor is already associated with the movie
-        bool alreadyCast = false;
-        for (Movie* m : actor->movies) {
-            if (m->id == movieId) {
-                alreadyCast = true;
-                break;
-            }
+        // Ensure both actor and movie exist in the graph
+        if (!actorMovieGraph.nodeExists(actor->name)) {
+            actorMovieGraph.addNode(actor->name);
+        }
+        if (!actorMovieGraph.nodeExists(movie->title)) {
+            actorMovieGraph.addNode(movie->title);
         }
 
-        if (alreadyCast) {
-            cout << "[Info] Actor \"" << actor->name << "\" is already cast in movie \"" << movie->title << "\".\n";
-            return;
-        }
-
-        actor->addMovie(movie);
-        movie->addActor(actor);
-
-        // Update Graph
+        // Add edge to the graph
         actorMovieGraph.addEdge(actor->name, movie->title);
 
         // Track the new cast relationship for appending to CSV
@@ -461,6 +483,7 @@ void addActorToMovie() {
         cout << "[Error] Invalid Actor ID or Movie ID.\n";
     }
 }
+
 
 
 
@@ -906,6 +929,10 @@ int main() {
                 }
             }
         }
+		else if (choice == 3) {
+			writeToCSV();
+			cout << "[Info] Data stored to CSV files successfully.\n";
+		}
         else {
             cout << "[Error] Invalid input, please try again.\n";
         }
