@@ -10,10 +10,10 @@ public:
     std::string id;
     std::string title;
     std::string plot;
-    int year;
+    std::string year; // Change from int to string
     std::vector<Actor*> actors;
 
-    Movie(std::string id, std::string title, std::string plot, int year)
+    Movie(std::string id, std::string title, std::string plot, std::string year)
         : id(id), title(title), plot(plot), year(year) {
     }
 
@@ -21,14 +21,24 @@ public:
         actors.push_back(actor);
     }
 
+    // Helper function to convert year to int for numeric operations
+    int getYearAsInt() const {
+        try {
+            return std::stoi(year);
+        }
+        catch (...) {
+            return -1; // Return -1 if conversion fails
+        }
+    }
+
     // Overload < operator
     bool operator<(const Movie& other) const {
-        return this->year < other.year;
+        return this->getYearAsInt() < other.getYearAsInt();
     }
 
     // Overload > operator
     bool operator>(const Movie& other) const {
-        return this->year > other.year;
+        return this->getYearAsInt() > other.getYearAsInt();
     }
 
     // Overload << operator
@@ -37,5 +47,5 @@ public:
             << ", Year: " << movie.year << ", Plot: " << movie.plot << ")";
         return os;
     }
-
 };
+

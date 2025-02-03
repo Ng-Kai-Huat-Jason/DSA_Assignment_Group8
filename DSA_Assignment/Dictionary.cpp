@@ -1,11 +1,10 @@
-// Dictionary.cpp
 #include "Dictionary.h"
 #include "Actor.h"  // Ensure Actor is fully defined
 #include "Movie.h"  // Ensure Movie is fully defined
-
 #include <cctype> // For character handling (if needed)
+#include <sstream>
 
-// Constructor for Node
+// Node constructor
 template <typename KeyType, typename ValueType>
 Node<KeyType, ValueType>::Node(KeyType key, ValueType* value)
     : key(key), value(value), next(nullptr) {
@@ -22,7 +21,7 @@ Dictionary<KeyType, ValueType>::Dictionary() : size(0) {
     }
 }
 
-// Destructor
+// Destructor for Dictionary
 template <typename KeyType, typename ValueType>
 Dictionary<KeyType, ValueType>::~Dictionary() {
     for (int i = 0; i < MAX_SIZE; ++i) {
@@ -30,7 +29,6 @@ Dictionary<KeyType, ValueType>::~Dictionary() {
         while (current) {
             Node<KeyType, ValueType>* toDelete = current;
             current = current->next;
-
             if (toDelete->value) {
                 delete toDelete->value;
             }
@@ -42,11 +40,11 @@ Dictionary<KeyType, ValueType>::~Dictionary() {
 // Custom hash function for std::string keys
 template <typename KeyType, typename ValueType>
 unsigned long Dictionary<KeyType, ValueType>::hash(const KeyType& key) const {
-    unsigned long hash = 5381;
+    unsigned long hashValue = 0;
     for (char c : key) {
-        hash = ((hash << 5) + hash) + c; // hash * 33 + c
+        hashValue = (hashValue * 31 + c) % MAX_SIZE;
     }
-    return hash % MAX_SIZE;
+    return hashValue;
 }
 
 // Add an item
@@ -92,8 +90,8 @@ bool Dictionary<KeyType, ValueType>::remove(const KeyType& key) {
             else {
                 table[index] = current->next;
             }
-            delete current->value; // Free the stored object
-            delete current;        // Free the node
+            delete current->value;
+            delete current;
             size--;
             return true;
         }
@@ -114,7 +112,7 @@ ValueType* Dictionary<KeyType, ValueType>::get(const KeyType& key) const {
         }
         current = current->next;
     }
-    return nullptr; // Return nullptr if key is not found
+    return nullptr; // Not found
 }
 
 // Check if empty
@@ -129,7 +127,7 @@ int Dictionary<KeyType, ValueType>::getSize() const {
     return size;
 }
 
-// Print the dictionary
+// Print the dictionary (for debugging)
 template <typename KeyType, typename ValueType>
 void Dictionary<KeyType, ValueType>::print() const {
     for (int i = 0; i < MAX_SIZE; ++i) {
@@ -141,7 +139,7 @@ void Dictionary<KeyType, ValueType>::print() const {
     }
 }
 
-// Retrieve all items as a vector
+// getAllItems: Returns a vector of values
 template <typename KeyType, typename ValueType>
 vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
     vector<ValueType*> items;
@@ -155,7 +153,20 @@ vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
     return items;
 }
 
+// getAllNodes: Returns a vector of Node pointers (each node contains both key and value)
+template <typename KeyType, typename ValueType>
+vector<Node<KeyType, ValueType>*> Dictionary<KeyType, ValueType>::getAllNodes() const {
+    vector<Node<KeyType, ValueType>*> nodes;
+    for (int i = 0; i < MAX_SIZE; ++i) {
+        Node<KeyType, ValueType>* current = table[i];
+        while (current) {
+            nodes.push_back(current);
+            current = current->next;
+        }
+    }
+    return nodes;
+}
+
 // Explicit template instantiation
 template class Dictionary<string, Actor>;
 template class Dictionary<string, Movie>;
-
