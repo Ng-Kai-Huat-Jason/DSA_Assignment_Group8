@@ -594,7 +594,7 @@ void addActorToMovie() {
     }
 }
 
-// Update details of an actor or a movie.
+// Update details of an actor or a movie.h
 void updateDetails() {
     int updateChoice;
     cout << "Update: (1) Actor Details, (2) Movie Details: ";
