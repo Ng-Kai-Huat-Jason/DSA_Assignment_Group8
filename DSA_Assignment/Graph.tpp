@@ -18,6 +18,7 @@ int Graph<T>::getNodeIndex(const T& node) {
 }
 
 
+
 // Add a new node to the graph
 template <typename T>
 void Graph<T>::addNode(const T& node) {
@@ -31,6 +32,22 @@ void Graph<T>::addNode(const T& node) {
         }
         adjacencyMatrix.push_back(vector<int>(count, 0)); // Add a row for the new node
 
+    }
+}
+
+// Remove a node from the graph
+template <typename T>
+void Graph<T>::removeNode(const T& node) {
+    int nodeIndex = getNodeIndex(node);
+    if (nodeIndex == -1) return; // Node not found
+
+    // Remove from nodes vector
+    nodes.erase(nodes.begin() + nodeIndex);
+
+    // Remove from adjacency matrix
+    adjacencyMatrix.erase(adjacencyMatrix.begin() + nodeIndex);
+    for (auto& row : adjacencyMatrix) {
+        row.erase(row.begin() + nodeIndex);
     }
 }
 
@@ -140,6 +157,7 @@ void Graph<T>::bfs(const T& startNode) {
         }
     }
     cout << endl;
+
 }
 
 // Explicit template instantiation

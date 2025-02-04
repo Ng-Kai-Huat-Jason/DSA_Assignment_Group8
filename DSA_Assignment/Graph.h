@@ -24,6 +24,12 @@ public:
     vector<T> getNeighbors(const T& node);
     void displayMatrix() const;
     void bfs(const T& startNode);
+    void removeNode(const T& node);
+
+    const vector<T>& getNodes() const {
+        return nodes;
+    }
 };
 
+#include "Graph.tpp"
 #endif // GRAPH_H

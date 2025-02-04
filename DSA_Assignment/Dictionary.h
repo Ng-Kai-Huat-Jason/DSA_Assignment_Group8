@@ -4,39 +4,50 @@
 #include <vector>
 #include <string>
 #include <iostream>
+
 using namespace std;
 
 const int MAX_SIZE = 101; // Prime number for better hash distribution
 
+// Forward declarations
+class Actor;
+class Movie;
+
+// Node structure
 template <typename KeyType, typename ValueType>
 struct Node {
     KeyType key;
     ValueType* value;
     Node* next;
 
-    Node(KeyType key, ValueType* value) : key(key), value(value), next(nullptr) {}
+    Node(KeyType key, ValueType* value);
 };
 
+// Dictionary class
 template <typename KeyType, typename ValueType>
 class Dictionary {
 private:
     Node<KeyType, ValueType>* table[MAX_SIZE];
     int size;
 
-    int hash(KeyType key) const;
+    unsigned long hash(const KeyType& key) const;
 
 public:
     Dictionary();
     ~Dictionary();
 
-    bool add(KeyType key, ValueType* value);
-    bool remove(KeyType key);
-    ValueType* get(KeyType key);
+    bool add(const KeyType& key, ValueType* value);
+    bool remove(const KeyType& key);
+    ValueType* get(const KeyType& key) const;
     bool isEmpty() const;
     int getSize() const;
     void print() const;
 
-    std::vector<ValueType*> getAllItems() const;
+    // Returns a vector of ValueType* (existing method)
+    vector<ValueType*> getAllItems() const;
+
+    // New: Returns a vector of Node pointers (each containing both key and value)
+    vector<Node<KeyType, ValueType>*> getAllNodes() const;
 };
 
 #endif // DICTIONARY_H

@@ -1,53 +1,73 @@
 #include "Dictionary.h"
-#include "Actor.h"
-#include "Movie.h"
+#include "Actor.h"  // Ensure Actor is fully defined
+#include "Movie.h"  // Ensure Movie is fully defined
+#include <cctype> // For character handling (if needed)
+#include <sstream>
 
-// Constructor
+// Node constructor
+template <typename KeyType, typename ValueType>
+Node<KeyType, ValueType>::Node(KeyType key, ValueType* value)
+    : key(key), value(value), next(nullptr) {
+    if (!value) {
+        std::cerr << "Error: Node created with null value for key: " << key << std::endl;
+    }
+}
+
+// Constructor for Dictionary
 template <typename KeyType, typename ValueType>
 Dictionary<KeyType, ValueType>::Dictionary() : size(0) {
-    for (int i = 0; i < MAX_SIZE; i++) {
+    for (int i = 0; i < MAX_SIZE; ++i) {
         table[i] = nullptr;
     }
 }
 
-// Destructor
+// Destructor for Dictionary
 template <typename KeyType, typename ValueType>
 Dictionary<KeyType, ValueType>::~Dictionary() {
-    for (int i = 0; i < MAX_SIZE; i++) {
+    for (int i = 0; i < MAX_SIZE; ++i) {
         Node<KeyType, ValueType>* current = table[i];
         while (current) {
             Node<KeyType, ValueType>* toDelete = current;
             current = current->next;
-            delete toDelete->value;
+            if (toDelete->value) {
+                delete toDelete->value;
+            }
             delete toDelete;
         }
     }
 }
 
-// Hash function
+// Custom hash function for std::string keys
 template <typename KeyType, typename ValueType>
-int Dictionary<KeyType, ValueType>::hash(KeyType key) const {
-    int hashValue = 0;
-    for (char ch : key) {
-        hashValue = (hashValue * 31 + ch) % MAX_SIZE;
+unsigned long Dictionary<KeyType, ValueType>::hash(const KeyType& key) const {
+    unsigned long hashValue = 0;
+    for (char c : key) {
+        hashValue = (hashValue * 31 + c) % MAX_SIZE;
     }
     return hashValue;
 }
 
 // Add an item
 template <typename KeyType, typename ValueType>
-bool Dictionary<KeyType, ValueType>::add(KeyType key, ValueType* value) {
-    int index = hash(key);
-    
+bool Dictionary<KeyType, ValueType>::add(const KeyType& key, ValueType* value) {
+    if (!value) {
+        std::cerr << "Error: Trying to add a null value for key: " << key << std::endl;
+        return false;
+    }
+
+    unsigned long index = hash(key);
     Node<KeyType, ValueType>* current = table[index];
+
+    // Check for duplicates
     while (current) {
         if (current->key == key) {
-            cout << "Error: Duplicate key detected!" << endl;
+            std::cerr << "Error: Duplicate key detected: " << key << std::endl;
             return false;
         }
         current = current->next;
     }
 
+    // Add new node at the beginning
     Node<KeyType, ValueType>* newNode = new Node<KeyType, ValueType>(key, value);
     newNode->next = table[index];
     table[index] = newNode;
@@ -57,8 +77,8 @@ bool Dictionary<KeyType, ValueType>::add(KeyType key, ValueType* value) {
 
 // Remove an item
 template <typename KeyType, typename ValueType>
-bool Dictionary<KeyType, ValueType>::remove(KeyType key) {
-    int index = hash(key);
+bool Dictionary<KeyType, ValueType>::remove(const KeyType& key) {
+    unsigned long index = hash(key);
     Node<KeyType, ValueType>* current = table[index];
     Node<KeyType, ValueType>* prev = nullptr;
 
@@ -70,6 +90,7 @@ bool Dictionary<KeyType, ValueType>::remove(KeyType key) {
             else {
                 table[index] = current->next;
             }
+            delete current->value;
             delete current;
             size--;
             return true;
@@ -82,8 +103,8 @@ bool Dictionary<KeyType, ValueType>::remove(KeyType key) {
 
 // Get an item
 template <typename KeyType, typename ValueType>
-ValueType* Dictionary<KeyType, ValueType>::get(KeyType key) {
-    int index = hash(key);
+ValueType* Dictionary<KeyType, ValueType>::get(const KeyType& key) const {
+    unsigned long index = hash(key);
     Node<KeyType, ValueType>* current = table[index];
     while (current) {
         if (current->key == key) {
@@ -91,7 +112,7 @@ ValueType* Dictionary<KeyType, ValueType>::get(KeyType key) {
         }
         current = current->next;
     }
-    return nullptr;
+    return nullptr; // Not found
 }
 
 // Check if empty
@@ -106,22 +127,22 @@ int Dictionary<KeyType, ValueType>::getSize() const {
     return size;
 }
 
-// Print the dictionary
+// Print the dictionary (for debugging)
 template <typename KeyType, typename ValueType>
 void Dictionary<KeyType, ValueType>::print() const {
-    for (int i = 0; i < MAX_SIZE; i++) {
+    for (int i = 0; i < MAX_SIZE; ++i) {
         Node<KeyType, ValueType>* current = table[i];
         while (current) {
-            cout << "Key: " << current->key << ", Value: (Address: " << *(current->value) << ")" << endl;
+            cout << "Key: " << current->key << ", Value Address: " << current->value << endl;
             current = current->next;
         }
     }
 }
 
-// Retrieve all items as a vector
+// getAllItems: Returns a vector of values
 template <typename KeyType, typename ValueType>
-std::vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
-    std::vector<ValueType*> items;
+vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
+    vector<ValueType*> items;
     for (int i = 0; i < MAX_SIZE; ++i) {
         Node<KeyType, ValueType>* current = table[i];
         while (current) {
@@ -130,6 +151,20 @@ std::vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
         }
     }
     return items;
+}
+
+// getAllNodes: Returns a vector of Node pointers (each node contains both key and value)
+template <typename KeyType, typename ValueType>
+vector<Node<KeyType, ValueType>*> Dictionary<KeyType, ValueType>::getAllNodes() const {
+    vector<Node<KeyType, ValueType>*> nodes;
+    for (int i = 0; i < MAX_SIZE; ++i) {
+        Node<KeyType, ValueType>* current = table[i];
+        while (current) {
+            nodes.push_back(current);
+            current = current->next;
+        }
+    }
+    return nodes;
 }
 
 // Explicit template instantiation
