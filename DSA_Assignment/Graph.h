@@ -31,4 +31,5 @@ public:
     }
 };
 
+#include "Graph.tpp"
 #endif // GRAPH_H

@@ -240,7 +240,6 @@ void loadMoviesFromCSV(const string& fileName) {
     file.close();
     cout << "[Info] Movies loaded successfully from " << fileName << endl;
 }
-
 // Load cast relationships from CSV.
 void loadCastsFromCSV(const string& fileName) {
     ifstream file(fileName);
