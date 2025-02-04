@@ -151,6 +151,42 @@ vector<string> parseCSVLine(const string& line) {
     return fields;
 }
 
+// Parse a CSV line into fields but DO NOT remove surrounding quotes.
+vector<string> parseCSVLinePreserveQuotes(const string& line) {
+    vector<string> fields;
+    string current;
+    bool inQuotes = false;
+    for (size_t i = 0; i < line.size(); i++) {
+        char c = line[i];
+        if (c == '"') {
+            // If inside quotes and next char is also a quote, add one literal quote.
+            if (inQuotes && i + 1 < line.size() && line[i + 1] == '"') {
+                current.push_back('"');
+                i++; // skip the escaped quote
+            }
+            else {
+                inQuotes = !inQuotes;
+                // Instead of discarding the quote, we keep it.
+                current.push_back(c);
+            }
+        }
+        else if (c == ',' && !inQuotes) {
+            fields.push_back(current);
+            current.clear();
+        }
+        else {
+            current.push_back(c);
+        }
+    }
+    fields.push_back(current);
+    // Trim whitespace from each field (but do not remove the surrounding quotes).
+    for (auto& field : fields) {
+        field = trim(field);
+    }
+    return fields;
+}
+
+
 
 //CSV Functions to load from csv
 //======================//
@@ -194,14 +230,13 @@ void loadActorsFromCSV(const string& fileName) {
     cout << "[Info] Actors loaded successfully from " << fileName << endl;
 }
 
-// Load movies from CSV 
+// Load movies from CSV without removing quotation marks for the Title.
 void loadMoviesFromCSV(const string& fileName) {
     ifstream file(fileName);
     if (!file.is_open()) {
         cout << "[Error] Failed to open " << fileName << endl;
         return;
     }
-
     string line;
     getline(file, line); // Skip header line
 
@@ -209,8 +244,8 @@ void loadMoviesFromCSV(const string& fileName) {
         if (line.empty())
             continue;
 
-        // Use our custom CSV parser to split the line.
-        vector<string> fields = parseCSVLine(line);
+        // Use our custom parser that preserves quotes.
+        vector<string> fields = parseCSVLinePreserveQuotes(line);
         // Expect at least four fields: id, title, plot, and year.
         if (fields.size() < 4) {
             cout << "[Warning] Skipping invalid movie record: " << line << endl;
@@ -218,7 +253,8 @@ void loadMoviesFromCSV(const string& fileName) {
         }
 
         string id = trim(fields[0]);
-        string title = trim(fields[1]);
+        // Do NOT remove the quotes from the title field.
+        string title = fields[1];  // leave as-is (with quotes if present)
         string plot = trim(fields[2]);
         string yearStr = trim(fields[3]);
 
@@ -226,8 +262,6 @@ void loadMoviesFromCSV(const string& fileName) {
             cout << "[Warning] Skipping invalid movie record: " << line << endl;
             continue;
         }
-
-        // Create the new Movie object.
         Movie* newMovie = new Movie(id, title, plot, yearStr);
         if (!movieDictionary.add(id, newMovie)) {
             delete newMovie; // Prevent memory leak if already exists.
@@ -236,10 +270,11 @@ void loadMoviesFromCSV(const string& fileName) {
             movieAVLTree.insert(newMovie);
         }
     }
-
     file.close();
     cout << "[Info] Movies loaded successfully from " << fileName << endl;
 }
+
+
 // Load cast relationships from CSV.
 void loadCastsFromCSV(const string& fileName) {
     ifstream file(fileName);
@@ -789,7 +824,18 @@ void getActorsByMovie() {
     string movieTitle;
     cout << "Enter movie title: ";
     getline(cin, movieTitle);
+    movieTitle = trim(movieTitle);
+
+    // Try to find the movie as entered.
     int movieIndex = actorMovieGraph.getNodeIndex(movieTitle);
+    // If not found, try adding surrounding quotes.
+    if (movieIndex == -1) {
+        string quotedTitle = "\"" + movieTitle + "\"";
+        movieIndex = actorMovieGraph.getNodeIndex(quotedTitle);
+        if (movieIndex != -1)
+            movieTitle = quotedTitle;  // use the quoted version if found
+    }
+
     if (movieIndex == -1) {
         cout << "\n[Error] Movie \"" << movieTitle << "\" not found in the graph.\n";
         return;
@@ -807,7 +853,7 @@ void getActorsByMovie() {
             }
         }
         cout << "\n=====================================" << endl;
-        cout << "Actors in \"" << movieTitle << "\"" << endl;
+        cout << "Actors in " << movieTitle << endl;
         cout << "=====================================" << endl;
         for (const auto& actor : actors) {
             cout << " - " << actor << "\n";
