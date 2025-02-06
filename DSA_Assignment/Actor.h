@@ -51,4 +51,7 @@ public:
             << ", Rated: " << actor.noOfTimesRated << ")";
         return os;
     }
+
+    virtual ~Actor() {}  // This is necessary for dynamic_cast
+
 };

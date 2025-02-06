@@ -7,9 +7,9 @@
 
 using namespace std;
 
-// Using Prime Number for better hash distribtuion
+// Using Prime Number for better hash distribution
 // 101 is the nearest prime number to 100
-const int MAX_SIZE = 101; 
+const int MAX_SIZE = 101;
 
 class Actor;
 class Movie;
@@ -35,9 +35,9 @@ private:
 
 public:
     Dictionary();
-    ~Dictionary();
+    virtual ~Dictionary();  // Make the destructor virtual for polymorphism
 
-	// Add, remove, get, isEmpty, getSize, print methods
+    // Basic operations
     bool add(const KeyType& key, ValueType* value);
     bool remove(const KeyType& key);
     ValueType* get(const KeyType& key) const;
@@ -50,6 +50,12 @@ public:
 
     // Returns a vector of Node pointers (each containing both key and value)
     vector<Node<KeyType, ValueType>*> getAllNodes() const;
+
+    bool loadFromCSV(const string& fileName, bool isActor);
+
+    // Patches the CSV file (updates records based on current dictionary data).
+    bool patchCSV(const string& fileName, bool isActor);
+
 };
 
 #endif // DICTIONARY_H

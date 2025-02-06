@@ -1,6 +1,7 @@
+// Movie.h
 #pragma once
-#include <iostream>
 #include <string>
+#include <iostream>
 #include <vector>
 using namespace std;
 
@@ -12,30 +13,32 @@ public:
     string title;
     string plot;
     string year;  // Stored as string for CSV compatibility.
-    double rating;      // Average rating (e.g., 4.2)
-    int noOfTimesRated; // Number of ratings received.
+    double rating;
+    int noOfTimesRated;
     vector<Actor*> actors;
 
+    // New member: flag to indicate if the title was originally quoted.
+    bool titleWasQuoted;
+
     Movie(string id, string title, string plot, string year, double rating = 0.0, int noOfTimesRated = 0)
-        : id(id), title(title), plot(plot), year(year), rating(rating), noOfTimesRated(noOfTimesRated) {
+        : id(id), title(title), plot(plot), year(year), rating(rating), noOfTimesRated(noOfTimesRated),
+        titleWasQuoted(false)
+    {
     }
 
-    // Add an actor to this movie.
     void addActor(Actor* actor) {
         actors.push_back(actor);
     }
 
-    // Helper function to convert year to int.
     int getYearAsInt() const {
         try {
             return stoi(year);
         }
         catch (...) {
-            return -1; // Return -1 if conversion fails.
+            return -1;
         }
     }
 
-    // Update the movie's rating with a new rating (1 to 5 stars).
     void updateRating(int newRating) {
         rating = ((rating * noOfTimesRated) + newRating) / (noOfTimesRated + 1);
         noOfTimesRated++;
@@ -60,4 +63,7 @@ public:
             << ", Rated: " << movie.noOfTimesRated << ")";
         return os;
     }
+
+    virtual ~Movie() {}  // This is necessary for dynamic_cast
+
 };
