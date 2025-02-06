@@ -240,54 +240,164 @@ void removeDuplicates(vector<string>& arr) {
     arr = temp;
 }
 
-// For Rating Feature
+// For Rating Feature // Uses Merge sort as using quick sort will crash the vector due to the large size of the vector causing a stack overflow
 // ======================//
-// Quick sort helper for Actor* based on rating (descending)
-int partitionActors(vector<Actor*>& arr, int low, int high) {
-    Actor* pivot = arr[high]; // pivot actor
-    int i = low - 1;
-    for (int j = low; j < high; j++) {
-        // If the current actor's rating is greater than or equal to the pivot's rating
-        if (arr[j]->rating >= pivot->rating) {
+void mergeActorsByRating(vector<Actor*>& arr, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    // Create temporary arrays
+    vector<Actor*> L(n1), R(n2);
+
+    // Copy data to temporary arrays
+    for (int i = 0; i < n1; i++)
+        L[i] = arr[left + i];
+    for (int i = 0; i < n2; i++)
+        R[i] = arr[mid + 1 + i];
+
+    // Merge the temporary arrays back into arr[left..right]
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i]->rating >= R[j]->rating) { // Descending order
+            arr[k] = L[i];
             i++;
-            swap(arr[i], arr[j]);
         }
+        else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
     }
-    swap(arr[i + 1], arr[high]);
-    return i + 1;
+
+    // Copy remaining elements of L[] if any
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    // Copy remaining elements of R[] if any
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
 }
 
-void quickSortActors(vector<Actor*>& arr, int low, int high) {
-    if (low < high) {
-        int pi = partitionActors(arr, low, high);
-        quickSortActors(arr, low, pi - 1);
-        quickSortActors(arr, pi + 1, high);
+void mergeSortActorsByRating(vector<Actor*>& arr, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Sort first and second halves
+        mergeSortActorsByRating(arr, left, mid);
+        mergeSortActorsByRating(arr, mid + 1, right);
+
+        // Merge the sorted halves
+        mergeActorsByRating(arr, left, mid, right);
     }
 }
 
-// Quick sort helper for Movie* based on rating (descending)
-int partitionMoviesRating(vector<Movie*>& arr, int low, int high) {
-    // Use the rating of the movie at index high as the pivot.
-    double pivot = arr[high]->rating;
-    int i = low - 1;
-    for (int j = low; j < high; j++) {
-        if (arr[j]->rating >= pivot) { // sort in descending order
+void mergeMoviesByRating(vector<Movie*>& arr, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    // Create temporary arrays
+    vector<Movie*> L(n1), R(n2);
+
+    // Copy data to temporary arrays
+    for (int i = 0; i < n1; i++)
+        L[i] = arr[left + i];
+    for (int i = 0; i < n2; i++)
+        R[i] = arr[mid + 1 + i];
+
+    // Merge the temporary arrays back into arr[left..right]
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i]->rating >= R[j]->rating) { // Descending order
+            arr[k] = L[i];
             i++;
-            swap(arr[i], arr[j]);
         }
+        else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
     }
-    swap(arr[i + 1], arr[high]);
-    return i + 1;
+
+    // Copy remaining elements of L[] if any
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    // Copy remaining elements of R[] if any
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
 }
 
-void quickSortMoviesRating(vector<Movie*>& arr, int low, int high) {
-    if (low < high) {
-        int pi = partitionMoviesRating(arr, low, high);
-        quickSortMoviesRating(arr, low, pi - 1);
-        quickSortMoviesRating(arr, pi + 1, high);
+void mergeSortMoviesByRating(vector<Movie*>& arr, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Sort first and second halves
+        mergeSortMoviesByRating(arr, left, mid);
+        mergeSortMoviesByRating(arr, mid + 1, right);
+
+        // Merge the sorted halves
+        mergeMoviesByRating(arr, left, mid, right);
     }
 }
 
+// Helper functions to display ratings with proper formatting
+void displayTopActors(const vector<Actor*>& actors) {
+    cout << "\n=====================================" << endl;
+    cout << "Top 10 Rated Actors" << endl;
+    cout << "=====================================" << endl;
+
+    if (actors.empty()) {
+        cout << "[Info] No rated actors found.\n";
+        return;
+    }
+
+    int displayCount = min(10, static_cast<int>(actors.size()));
+    for (int i = 0; i < displayCount; i++) {
+        string ratingStr = to_string(actors[i]->rating);
+        size_t decimalPos = ratingStr.find('.');
+        if (decimalPos != string::npos && ratingStr.length() > decimalPos + 2) {
+            ratingStr = ratingStr.substr(0, decimalPos + 3);
+        }
+        cout << i + 1 << ". " << actors[i]->name
+            << "\n   Rating: " << ratingStr
+            << " (" << actors[i]->noOfTimesRated << " ratings)\n";
+    }
+}
+
+void displayTopMovies(const vector<Movie*>& movies) {
+    cout << "\n=====================================" << endl;
+    cout << "Top 10 Rated Movies" << endl;
+    cout << "=====================================" << endl;
+
+    if (movies.empty()) {
+        cout << "[Info] No rated movies found.\n";
+        return;
+    }
+
+    int displayCount = min(10, static_cast<int>(movies.size()));
+    for (int i = 0; i < displayCount; i++) {
+        string ratingStr = to_string(movies[i]->rating);
+        size_t decimalPos = ratingStr.find('.');
+        if (decimalPos != string::npos && ratingStr.length() > decimalPos + 2) {
+            ratingStr = ratingStr.substr(0, decimalPos + 3);
+        }
+        cout << i + 1 << ". " << movies[i]->title
+            << "\n   Rating: " << ratingStr
+            << " (" << movies[i]->noOfTimesRated << " ratings)\n";
+    }
+}
 
 
 //CSV Functions to load from csv
@@ -1167,11 +1277,31 @@ void rateMovieOrActor() {
 
 // Display top 10 rating for Actor or Movie
 void displayRating() {
+    cout << "\nDo you want to view Top 10 Actors or Movies? (A/M): ";
+    char choice;
+    cin >> choice;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
+    choice = toupper(choice);
+
+    if (choice == 'A') {
+        vector<Actor*> actors = actorDictionary.getAllItems();
+        if (!actors.empty()) {
+            mergeSortActorsByRating(actors, 0, actors.size() - 1);
+        }
+        displayTopActors(actors);
+    }
+    else if (choice == 'M') {
+        vector<Movie*> movies = movieDictionary.getAllItems();
+        if (!movies.empty()) {
+            mergeSortMoviesByRating(movies, 0, movies.size() - 1);
+        }
+        displayTopMovies(movies);
+    }
+    else {
+        cout << "[Error] Invalid choice. Please select either 'A' for actors or 'M' for movies.\n";
+    }
 }
-
-
-
 
 
 //Main Loop

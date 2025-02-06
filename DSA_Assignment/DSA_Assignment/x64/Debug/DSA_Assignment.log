@@ -1,10 +1,8 @@
 ﻿  DSA_Assignment.cpp
-C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(861,56): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(966,44): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1010,44): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1070,54): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1184,50): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1189,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1205,56): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1210,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(971,56): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1076,44): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1120,44): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1180,54): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1290,62): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\DSA_Assignment.cpp(1297,62): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   DSA_Assignment.vcxproj -> C:\Users\zekke\Desktop\DSA\Assignment\DSA_Assignment\DSA_Assignment\x64\Debug\DSA_Assignment.exe
