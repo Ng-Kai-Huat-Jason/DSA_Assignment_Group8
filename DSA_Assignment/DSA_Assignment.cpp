@@ -352,7 +352,6 @@ void mergeSortMoviesByRating(vector<Movie*>& arr, int left, int right) {
     }
 }
 
-// Helper functions to display ratings with proper formatting
 void displayTopActors(const vector<Actor*>& actors) {
     cout << "\n=====================================" << endl;
     cout << "Top 10 Rated Actors" << endl;
@@ -368,11 +367,11 @@ void displayTopActors(const vector<Actor*>& actors) {
         string ratingStr = to_string(actors[i]->rating);
         size_t decimalPos = ratingStr.find('.');
         if (decimalPos != string::npos && ratingStr.length() > decimalPos + 2) {
-            ratingStr = ratingStr.substr(0, decimalPos + 3);
+            ratingStr = ratingStr.substr(0, decimalPos + 3); // Limit to 2 decimal places
         }
-        cout << i + 1 << ". " << actors[i]->name
-            << "\n   Rating: " << ratingStr
-            << " (" << actors[i]->noOfTimesRated << " ratings)\n";
+        cout << i + 1 << ". " << actors[i]->name << " - "
+            << ratingStr << " - "
+            << actors[i]->noOfTimesRated << " ratings" << endl;
     }
 }
 
@@ -391,13 +390,14 @@ void displayTopMovies(const vector<Movie*>& movies) {
         string ratingStr = to_string(movies[i]->rating);
         size_t decimalPos = ratingStr.find('.');
         if (decimalPos != string::npos && ratingStr.length() > decimalPos + 2) {
-            ratingStr = ratingStr.substr(0, decimalPos + 3);
+            ratingStr = ratingStr.substr(0, decimalPos + 3); // Limit to 2 decimal places
         }
-        cout << i + 1 << ". " << movies[i]->title
-            << "\n   Rating: " << ratingStr
-            << " (" << movies[i]->noOfTimesRated << " ratings)\n";
+        cout << i + 1 << ". " << movies[i]->title << " - "
+            << ratingStr << " - "
+            << movies[i]->noOfTimesRated << " ratings" << endl;
     }
 }
+
 
 
 //CSV Functions to load from csv
@@ -1215,12 +1215,22 @@ void rateMovieOrActor() {
 
     if (choice == 'A') {
         // Rate an actor.
-        string actorID = getNonEmptyInput("Enter the Actor ID to rate: ");
-        Actor* actor = actorDictionary.get(actorID);
+        string actorName = getNonEmptyInput("Enter the Actor Name to rate: ");
+        vector<Actor*> allActors = actorDictionary.getAllItems();
+        Actor* actor = nullptr;
+
+        for (Actor* a : allActors) {
+            if (a->name == actorName) {
+                actor = a;
+                break;
+            }
+        }
+
         if (!actor) {
-            cout << "[Error] Actor with ID \"" << actorID << "\" not found.\n";
+            cout << "[Error] Actor with name \"" << actorName << "\" not found.\n";
             return;
         }
+
         int stars;
         while (true) {
             cout << "Enter rating (1-5 stars): ";
@@ -1236,7 +1246,6 @@ void rateMovieOrActor() {
             }
         }
         // Update the rating as a running average.
-        // newRating = (oldRating * noOfTimesRated + stars) / (noOfTimesRated + 1)
         actor->rating = (actor->rating * actor->noOfTimesRated + stars) / (actor->noOfTimesRated + 1);
         actor->noOfTimesRated++;
         cout << "[Success] Actor \"" << actor->name << "\" now has an average rating of "
@@ -1244,12 +1253,22 @@ void rateMovieOrActor() {
     }
     else if (choice == 'M') {
         // Rate a movie.
-        string movieID = getNonEmptyInput("Enter the Movie ID to rate: ");
-        Movie* movie = movieDictionary.get(movieID);
+        string movieTitle = getNonEmptyInput("Enter the Movie Title to rate: ");
+        vector<Movie*> allMovies = movieDictionary.getAllItems();
+        Movie* movie = nullptr;
+
+        for (Movie* m : allMovies) {
+            if (m->title == movieTitle) {
+                movie = m;
+                break;
+            }
+        }
+
         if (!movie) {
-            cout << "[Error] Movie with ID \"" << movieID << "\" not found.\n";
+            cout << "[Error] Movie with title \"" << movieTitle << "\" not found.\n";
             return;
         }
+
         int stars;
         while (true) {
             cout << "Enter rating (1-5 stars): ";
@@ -1274,6 +1293,7 @@ void rateMovieOrActor() {
         cout << "[Error] Invalid choice. Please select either 'A' for actor or 'M' for movie.\n";
     }
 }
+
 
 // Display top 10 rating for Actor or Movie
 void displayRating() {
