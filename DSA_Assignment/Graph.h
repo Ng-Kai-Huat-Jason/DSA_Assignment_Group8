@@ -1,3 +1,10 @@
+
+// Graph class template
+// Uses an adjacency matrix (a vector of vectors of integers) and a vector of nodes that are strings representing either an actor’s name or a movie title
+// The graph is undirected so an edge exists between two nodes 
+// if there is an association like when an actor stars in a movie, 
+// so an edge is created between the actor’s name and the movie title
+
 #ifndef GRAPH_H
 #define GRAPH_H
 
