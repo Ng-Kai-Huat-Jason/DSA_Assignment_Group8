@@ -64,6 +64,6 @@ public:
         return os;
     }
 
-    virtual ~Movie() {}  // This is necessary for dynamic_cast
+    virtual ~Movie() {}  
 
 };

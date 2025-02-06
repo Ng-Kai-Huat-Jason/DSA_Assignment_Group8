@@ -458,6 +458,113 @@ void storeDataToCsv() {
 }
 
 
+void updateActorDetails() {
+    string actorId = getNonEmptyInput("Enter Actor ID to update: ");
+    Actor* actor = actorDictionary.get(actorId);
+    if (!actor) {
+        cout << "[Error] Actor not found.\n";
+        return;
+    }
+
+    cout << "\nUpdate Actor Details:\n";
+    cout << "1. Update Name\n";
+    cout << "2. Update Birth Year\n";
+    cout << "3. Update Both\n";
+    int choice;
+    cin >> choice;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    if (choice == 1 || choice == 3) {
+        string oldName = actor->name;
+        string newName = getNonEmptyInput("Enter new Name (current: " + actor->name + "): ");
+        actor->name = newName;
+        if (oldName != newName)
+            actorMovieGraph.updateNode(oldName, newName);
+    }
+    if (choice == 2 || choice == 3) {
+        int newBirthYear;
+        while (true) {
+            cout << "Enter new Birth Year (current: " << actor->birthYear << "): ";
+            cin >> newBirthYear;
+            if (cin.fail() || newBirthYear <= 0) {
+                cout << "[Error] Invalid birth year.\n";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            else {
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                actor->birthYear = newBirthYear;
+                break;
+            }
+        }
+    }
+    cout << "[Success] Actor details updated.\n";
+    // Re-insert into AVL tree if needed (if your tree supports updates).
+    actorAVLTree.insert(actor);
+}
+
+void updateMovieDetails() {
+    string movieId = getNonEmptyInput("Enter Movie ID to update: ");
+    Movie* movie = movieDictionary.get(movieId);
+    if (!movie) {
+        cout << "[Error] Movie not found.\n";
+        return;
+    }
+
+    cout << "\nUpdate Movie Details:\n";
+    cout << "1. Update Title\n";
+    cout << "2. Update Plot\n";
+    cout << "3. Update Year\n";
+    cout << "4. Update Title and Plot\n";
+    cout << "5. Update Title and Year\n";
+    cout << "6. Update Plot and Year\n";
+    cout << "7. Update All (Title, Plot, and Year)\n";
+    int choice;
+    cin >> choice;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    if (choice == 1 || choice == 4 || choice == 5 || choice == 7) {
+        string oldTitle = movie->title;
+        string newTitle = getNonEmptyInput("Enter new Title (current: " + movie->title + "): ");
+        movie->title = newTitle;
+        // Ask if the title should be quoted.
+        char quoteChoice;
+        cout << "Should the title be quoted? (Y/N): ";
+        cin >> quoteChoice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (toupper(quoteChoice) == 'Y')
+            movie->titleWasQuoted = true;
+        else
+            movie->titleWasQuoted = false;
+        if (oldTitle != newTitle)
+            actorMovieGraph.updateNode(oldTitle, newTitle);
+    }
+    if (choice == 2 || choice == 4 || choice == 6 || choice == 7) {
+        string newPlot = getNonEmptyInput("Enter new Plot (current: " + movie->plot + "): ");
+        movie->plot = newPlot;
+    }
+    if (choice == 3 || choice == 5 || choice == 6 || choice == 7) {
+        int newYear;
+        while (true) {
+            cout << "Enter new Year (current: " << movie->year << "): ";
+            cin >> newYear;
+            if (cin.fail() || newYear <= 0) {
+                cout << "[Error] Invalid year.\n";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            else {
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                movie->year = to_string(newYear);
+                break;
+            }
+        }
+    }
+    cout << "[Success] Movie details updated.\n";
+    movieAVLTree.insert(movie);
+}
+
+
 // Feature Functions
 //==============================//
 
@@ -555,68 +662,10 @@ void updateDetails() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (updateChoice == 1) {
-        string actorId = getNonEmptyInput("Enter Actor ID to update: ");
-        Actor* actor = actorDictionary.get(actorId);
-        if (actor) {
-            string oldName = actor->name;
-            string newName = getNonEmptyInput("Enter new Name (current: " + actor->name + "): ");
-            int newBirthYear;
-            while (true) {
-                cout << "Enter new Birth Year (current: " << actor->birthYear << "): ";
-                cin >> newBirthYear;
-                if (cin.fail() || newBirthYear <= 0) {
-                    cout << "[Error] Invalid birth year.\n";
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                }
-                else {
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    break;
-                }
-            }
-            actor->name = newName;
-            actor->birthYear = newBirthYear;
-            cout << "[Success] Actor details updated.\n";
-            actorAVLTree.insert(actor);
-            if (oldName != newName)
-                actorMovieGraph.updateNode(oldName, newName);
-        }
-        else {
-            cout << "[Error] Actor not found.\n";
-        }
+        updateActorDetails();
     }
     else if (updateChoice == 2) {
-        string movieId = getNonEmptyInput("Enter Movie ID to update: ");
-        Movie* movie = movieDictionary.get(movieId);
-        if (movie) {
-            string oldTitle = movie->title;
-            string newTitle = getNonEmptyInput("Enter new Title (current: " + movie->title + "): ");
-            string newPlot = getNonEmptyInput("Enter new Plot (current: " + movie->plot + "): ");
-            int newYear;
-            while (true) {
-                cout << "Enter new Year (current: " << movie->year << "): ";
-                cin >> newYear;
-                if (cin.fail() || newYear <= 0) {
-                    cout << "[Error] Invalid year.\n";
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                }
-                else {
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    break;
-                }
-            }
-            movie->title = newTitle;
-            movie->plot = newPlot;
-            movie->year = to_string(newYear);
-            cout << "[Success] Movie details updated.\n";
-            movieAVLTree.insert(movie);
-            if (oldTitle != newTitle)
-                actorMovieGraph.updateNode(oldTitle, newTitle);
-        }
-        else {
-            cout << "[Error] Movie not found.\n";
-        }
+        updateMovieDetails();
     }
     else {
         cout << "[Error] Invalid choice.\n";

@@ -124,12 +124,13 @@ void Graph<T>::bfs(const T& startNode) {
     cout << endl;
 }
 
-// New method: update a node's value (for example, when an actor's name changes)
 template <typename T>
 void Graph<T>::updateNode(const T& oldNode, const T& newNode) {
     int idx = getNodeIndex(oldNode);
     if (idx == -1) {
-        cout << "[Error] Node \"" << oldNode << "\" not found for update.\n";
+        // Instead of erroring out, simply add the new node.
+        cout << "[Warning] Node \"" << oldNode << "\" not found in the graph. Adding new node \"" << newNode << "\" instead.\n";
+        addNode(newNode);
         return;
     }
     // Save the current neighbor list
@@ -145,6 +146,7 @@ void Graph<T>::updateNode(const T& oldNode, const T& newNode) {
         }
     }
 }
+
 
 // New method: List movies for an actor (assumes actor is stored as string)
 template <typename T>
