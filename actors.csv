@@ -1,13 +1,13 @@
 id,name,birth,rating,noOfTimesRated
-418078,Tom Jansen,1945,5,5
-560732,Armando Matías Guiu,1925,4,1
-2671944,Cristián Carvajal,1977,3,1
-250215,Meredith Edwards,1917,1,1
-7360585,Inna Bakelman,1989,2,1
-766291,Yuka Sato,1973,1,1
-7477442,Jason Stange,1970,4,1
-550728,Alan Marshall,1938,2,2
-1276051,Benjamin Jackendoff,1980,1,4
+418078,Tom Jansen,1945,5.000000,5
+560732,Armando Matías Guiu,1925,4.000000,1
+2671944,Cristián Carvajal,1977,3.000000,1
+250215,Meredith Edwards,1917,1.000000,1
+7360585,Inna Bakelman,1989,2.000000,1
+766291,Yuka Sato,1973,1.000000,1
+7477442,Jason Stange,1970,4.000000,1
+550728,Alan Marshall,1938,2.000000,2
+1276051,Benjamin Jackendoff,1980,1.000000,4
 755723,Shigeaki Saegusa,1942,0.000000,0
 3900613,Chase Layman,1985,0.000000,0
 2180,Francesca Archibugi,1960,0.000000,0
@@ -16834,4 +16834,4 @@ id,name,birth,rating,noOfTimesRated
 1650893,Brian Voelkerding,1983,0.000000,0
 350673,Sándor Gáspár,1956,0.000000,0
 958975,Frans Zwartjes,1927,0.000000,0
-1,Joe,2000,3.500000,2
+1,Joe,2000,3.333333,3
