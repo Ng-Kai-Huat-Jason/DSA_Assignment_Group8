@@ -1,4 +1,4 @@
-// Student 1: Ng Kai Huat Jason(S10262552)
+// Student 1: Ng Kai Huat Jason (S10262552)
 // Student 2: Law Ming Qi (S10257808)
 
 #include <iostream>
@@ -17,20 +17,19 @@
 #include "AVLTree.h"
 #include "Graph.h"
 
-
 using namespace std;
 
 // Global vectors to track new entries
-vector<Actor*> newActors;
-vector<Movie*> newMovies;
-vector<pair<string, string>> newCasts; // Each pair holds (ActorID, MovieID)
+vector<Actor*> newActors;               // Stores newly added actors
+vector<Movie*> newMovies;               // Stores newly added movies
+vector<pair<string, string>> newCasts;  // Stores new cast relationships (ActorID, MovieID)
 
 // Global data structures
-Dictionary<string, Actor> actorDictionary;
-Dictionary<string, Movie> movieDictionary;
-AVLTree<Actor> actorAVLTree;
-AVLTree<Movie> movieAVLTree;
-Graph<string> actorMovieGraph;
+Dictionary<string, Actor> actorDictionary;  // Dictionary to store actors
+Dictionary<string, Movie> movieDictionary;  // Dictionary to store movies
+AVLTree<Actor> actorAVLTree;                // AVL Tree to store actors
+AVLTree<Movie> movieAVLTree;                // AVL Tree to store movies
+Graph<string> actorMovieGraph;              // Graph to represent actor-movie relationships
 
 // Menu Functions
 //======================//
@@ -71,17 +70,17 @@ void userMenu() {
     cout << "(3) Display all movies an actor starred in (in alphabetical order)" << endl;
     cout << "(4) Display all the actors in a particular movie (in alphabetical order)" << endl;
     cout << "(5) Display a list of all actors that a particular actor knows" << endl;
-	cout << "(6) Rate a Movie or Actor" << endl;
-	cout << "(7) Display Top 10 rating for Actor or Movie" << endl;
+    cout << "(6) Rate a Movie or Actor" << endl;
+    cout << "(7) Display Top 10 rating for Actor or Movie" << endl;
     cout << "(8) Go back to Main Menu" << endl;
     cout << "=====================================" << endl;
     cout << "Enter your choice: ";
 }
 
-//Helper Functions
+// Helper Functions
 //======================//
 
-// Trim leading and trailing whitespace.
+// Trim leading and trailing whitespace from a string.
 string trim(const string& str) {
     size_t start = str.find_first_not_of(" \t");
     size_t end = str.find_last_not_of(" \t");
@@ -115,7 +114,7 @@ string getNonEmptyInput(const string& prompt) {
     }
 }
 
-// Helper function that parses a CSV line into fields while respecting quotes.
+// Parse a CSV line into fields while respecting quotes.
 vector<string> parseCSVLine(const string& line) {
     vector<string> fields;
     string current;
@@ -214,34 +213,27 @@ void quickSort(vector<T>& arr, int low, int high, Compare comp) {
     }
 }
 
-
 // Removes duplicate strings from a sorted vector.
 void removeDuplicates(vector<string>& arr) {
-    // If the vector is empty, there's nothing to do.
     if (arr.empty())
         return;
 
-    // Create a temporary vector to hold unique items.
     vector<string> temp;
-
-    // Always include the first element.
     temp.push_back(arr[0]);
 
-    // Iterate through the vector starting from the second element.
     for (size_t i = 1; i < arr.size(); ++i) {
-        // If the current element is different from the last unique element added,
-        // add it to the temporary vector.
         if (arr[i] != temp.back()) {
             temp.push_back(arr[i]);
         }
     }
 
-    // Replace the original vector with the vector of unique elements.
     arr = temp;
 }
 
 // For Rating Feature // Uses Merge sort as using quick sort will crash the vector due to the large size of the vector causing a stack overflow
 // ======================//
+
+// Merge function for sorting actors by rating.
 void mergeActorsByRating(vector<Actor*>& arr, int left, int mid, int right) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
@@ -284,6 +276,7 @@ void mergeActorsByRating(vector<Actor*>& arr, int left, int mid, int right) {
     }
 }
 
+// Merge sort function for sorting actors by rating.
 void mergeSortActorsByRating(vector<Actor*>& arr, int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;
@@ -297,6 +290,7 @@ void mergeSortActorsByRating(vector<Actor*>& arr, int left, int right) {
     }
 }
 
+// Merge function for sorting movies by rating.
 void mergeMoviesByRating(vector<Movie*>& arr, int left, int mid, int right) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
@@ -339,6 +333,7 @@ void mergeMoviesByRating(vector<Movie*>& arr, int left, int mid, int right) {
     }
 }
 
+// Merge sort function for sorting movies by rating.
 void mergeSortMoviesByRating(vector<Movie*>& arr, int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;
@@ -352,6 +347,7 @@ void mergeSortMoviesByRating(vector<Movie*>& arr, int left, int right) {
     }
 }
 
+// Display the top 10 rated actors.
 void displayTopActors(const vector<Actor*>& actors) {
     cout << "\n=====================================" << endl;
     cout << "Top 10 Rated Actors" << endl;
@@ -375,6 +371,7 @@ void displayTopActors(const vector<Actor*>& actors) {
     }
 }
 
+// Display the top 10 rated movies.
 void displayTopMovies(const vector<Movie*>& movies) {
     cout << "\n=====================================" << endl;
     cout << "Top 10 Rated Movies" << endl;
@@ -398,9 +395,7 @@ void displayTopMovies(const vector<Movie*>& movies) {
     }
 }
 
-
-
-//CSV Functions to load from csv
+// CSV Functions to load from CSV
 //======================//
 
 // Load actors from CSV
@@ -493,8 +488,8 @@ void loadMoviesFromCSV(const string& fileName) {
             timesRatedStr = trim(fields[5]);
 
         if (id.empty() || title.empty() || yearStr.empty()) {
-            cout << "[Warning] Skipping invalid movie record: " << line << endl;
-            continue;
+            cout << "[Warning] Skipping invalid movie record : " << line << endl;
+                continue;
         }
         Movie* newMovie = new Movie(id, title, plot, yearStr);
         try {
@@ -516,45 +511,43 @@ void loadMoviesFromCSV(const string& fileName) {
     cout << "[Info] Movies loaded successfully from " << fileName << endl;
 }
 
-
 // Load cast relationships from CSV.
 void loadCastsFromCSV(const string& fileName) {
-    ifstream file(fileName);
-    if (!file.is_open()) {
+    ifstream file(fileName); // Open the CSV file
+    if (!file.is_open()) { // Check if the file opened successfully
         cout << "[Error] Failed to open " << fileName << endl;
         return;
     }
     string line;
-    getline(file, line); // Skip header
-    while (getline(file, line)) {
-        stringstream ss(line);
+    getline(file, line); // Skip the header line
+    while (getline(file, line)) { // Read each line of the file
+        stringstream ss(line); // Use a stringstream to parse the line
         string actorId, movieId;
-        getline(ss, actorId, ',');
-        getline(ss, movieId, ',');
-        if (actorId.empty() || movieId.empty()) {
+        getline(ss, actorId, ','); // Extract the actor ID
+        getline(ss, movieId, ','); // Extract the movie ID
+        if (actorId.empty() || movieId.empty()) { // Check for invalid records
             cout << "[Warning] Skipping invalid cast record: " << line << endl;
             continue;
         }
-        Actor* actor = actorDictionary.get(actorId);
-        Movie* movie = movieDictionary.get(movieId);
-        if (!actor || !movie) {
+        Actor* actor = actorDictionary.get(actorId); // Get the actor from the dictionary
+        Movie* movie = movieDictionary.get(movieId); // Get the movie from the dictionary
+        if (!actor || !movie) { // Check if actor or movie exists
             cout << "[Warning] Actor or Movie not found for IDs (" << actorId << ", " << movieId << "). Skipping record.\n";
             continue;
         }
-        actor->addMovie(movie);
-        movie->addActor(actor);
-        if (!actorMovieGraph.nodeExists(actor->name))
+        actor->addMovie(movie); // Add the movie to the actor's list
+        movie->addActor(actor); // Add the actor to the movie's list
+        if (!actorMovieGraph.nodeExists(actor->name)) // Add actor to the graph if not already present
             actorMovieGraph.addNode(actor->name);
-        if (!actorMovieGraph.nodeExists(movie->title))
+        if (!actorMovieGraph.nodeExists(movie->title)) // Add movie to the graph if not already present
             actorMovieGraph.addNode(movie->title);
-        actorMovieGraph.addEdge(actor->name, movie->title);
+        actorMovieGraph.addEdge(actor->name, movie->title); // Add an edge between actor and movie
     }
-    file.close();
+    file.close(); // Close the file
     cout << "[Info] Casts loaded successfully from " << fileName << endl;
 }
 
-
-// CSV Functons to store data and update
+// CSV Functions to store data and update
 //------------------------------//
 
 // Append new actor, movie, and cast records to their CSV files.
@@ -571,9 +564,9 @@ void appendNewDataToCsv() {
                 outFile.close();
             }
         }
-        outFile.open(filename, ios::app);
+        outFile.open(filename, ios::app); // Open the file in append mode
         if (outFile.is_open()) {
-            for (const Actor* actor : newActors) {
+            for (const Actor* actor : newActors) { // Write each new actor to the file
                 outFile << actor->id << "," << actor->name << "," << actor->birthYear << ","
                     << actor->rating << "," << actor->noOfTimesRated << "\n";
             }
@@ -589,17 +582,16 @@ void appendNewDataToCsv() {
     {
         string filename = "../movies.csv";
         ofstream outFile;
-        if (!fileExists(filename)) {
+        if (!fileExists(filename)) { // Create the file if it doesn't exist
             outFile.open(filename, ios::out);
             if (outFile.is_open()) {
                 outFile << "MovieID,Title,Plot,Year,Rating,NoOfTimesRated\n";
                 outFile.close();
             }
         }
-        outFile.open(filename, ios::app);
+        outFile.open(filename, ios::app); // Open the file in append mode
         if (outFile.is_open()) {
-            for (const Movie* movie : newMovies) {
-                // Note: No extra quotes added.
+            for (const Movie* movie : newMovies) { // Write each new movie to the file
                 outFile << movie->id << "," << movie->title << "," << movie->plot << ","
                     << movie->year << "," << movie->rating << "," << movie->noOfTimesRated << "\n";
             }
@@ -611,20 +603,20 @@ void appendNewDataToCsv() {
         }
     }
 
-    // Append new cast relationships (unchanged).
+    // Append new cast relationships
     {
         string filename = "../cast.csv";
         ofstream outFile;
-        if (!fileExists(filename)) {
+        if (!fileExists(filename)) { // Create the file if it doesn't exist
             outFile.open(filename, ios::out);
             if (outFile.is_open()) {
                 outFile << "ActorID,MovieID\n";
                 outFile.close();
             }
         }
-        outFile.open(filename, ios::app);
+        outFile.open(filename, ios::app); // Open the file in append mode
         if (outFile.is_open()) {
-            for (const auto& castPair : newCasts) {
+            for (const auto& castPair : newCasts) { // Write each new cast relationship to the file
                 outFile << castPair.first << "," << castPair.second << "\n";
             }
             outFile.close();
@@ -639,36 +631,36 @@ void appendNewDataToCsv() {
 // Patch (update) the actors CSV: update only changed records.
 void patchActorsCSV() {
     string filename = "../actors.csv";
-    ifstream inFile(filename);
+    ifstream inFile(filename); // Open the file for reading
     if (!inFile.is_open()) {
         cout << "[Error] Unable to open " << filename << " for patching actors.\n";
         return;
     }
-    vector<string> lines;
+    vector<string> lines; // Store all lines from the file
     string header;
-    getline(inFile, header); // Read header
+    getline(inFile, header); // Read the header line
     lines.push_back(header);
     string line;
-    while (getline(inFile, line)) {
+    while (getline(inFile, line)) { // Read each line of the file
         stringstream ss(line);
         string id;
-        getline(ss, id, ',');
-        id = trim(id);
-        Actor* actor = actorDictionary.get(id);
+        getline(ss, id, ','); // Extract the actor ID
+        id = trim(id); // Trim any whitespace
+        Actor* actor = actorDictionary.get(id); // Get the actor from the dictionary
         if (actor) {
-            // Rebuild record line using current dictionary data.
+            // Rebuild the record line using current dictionary data
             string updatedLine = actor->id + "," + actor->name + "," + to_string(actor->birthYear) +
                 "," + to_string(actor->rating) + "," + to_string(actor->noOfTimesRated);
-            lines.push_back(updatedLine);
+            lines.push_back(updatedLine); // Add the updated line to the list
         }
         else {
-            lines.push_back(line);
+            lines.push_back(line); // Keep the original line if the actor is not found
         }
     }
-    inFile.close();
-    ofstream outFile(filename, ios::out);
+    inFile.close(); // Close the input file
+    ofstream outFile(filename, ios::out); // Open the file for writing
     if (outFile.is_open()) {
-        for (const string& l : lines)
+        for (const string& l : lines) // Write all lines back to the file
             outFile << l << "\n";
         outFile.close();
         cout << "[Info] Actors CSV patched successfully.\n";
@@ -681,37 +673,36 @@ void patchActorsCSV() {
 // Patch (update) the movies CSV: update only changed records.
 void patchMoviesCSV() {
     string filename = "../movies.csv";
-    ifstream inFile(filename);
+    ifstream inFile(filename); // Open the file for reading
     if (!inFile.is_open()) {
         cout << "[Error] Unable to open " << filename << " for patching movies.\n";
         return;
     }
-    vector<string> lines;
+    vector<string> lines; // Store all lines from the file
     string header;
-    getline(inFile, header); // Read header
+    getline(inFile, header); // Read the header line
     lines.push_back(header);
     string line;
-    while (getline(inFile, line)) {
+    while (getline(inFile, line)) { // Read each line of the file
         stringstream ss(line);
         string id;
-        getline(ss, id, ',');
-        id = trim(id);
-        Movie* movie = movieDictionary.get(id);
+        getline(ss, id, ','); // Extract the movie ID
+        id = trim(id); // Trim any whitespace
+        Movie* movie = movieDictionary.get(id); // Get the movie from the dictionary
         if (movie) {
-            // Rebuild record line using current dictionary data.
-            // Use movie->year as is (without trim) so the year digits are preserved.
+            // Rebuild the record line using current dictionary data
             string updatedLine = movie->id + "," + movie->title + "," + movie->plot + "," + movie->year +
                 "," + to_string(movie->rating) + "," + to_string(movie->noOfTimesRated);
-            lines.push_back(updatedLine);
+            lines.push_back(updatedLine); // Add the updated line to the list
         }
         else {
-            lines.push_back(line);
+            lines.push_back(line); // Keep the original line if the movie is not found
         }
     }
-    inFile.close();
-    ofstream outFile(filename, ios::out);
+    inFile.close(); // Close the input file
+    ofstream outFile(filename, ios::out); // Open the file for writing
     if (outFile.is_open()) {
-        for (const string& l : lines)
+        for (const string& l : lines) // Write all lines back to the file
             outFile << l << "\n";
         outFile.close();
         cout << "[Info] Movies CSV patched successfully.\n";
@@ -724,19 +715,18 @@ void patchMoviesCSV() {
 // Combined function to store (patch and append) all CSV data.
 void storeDataToCsv() {
     cout << "[Info] Storing data to CSV files...\n";
-	appendNewDataToCsv();
-    patchActorsCSV();
-    patchMoviesCSV();
+    appendNewDataToCsv(); // Append new data to CSV files
+    patchActorsCSV(); // Patch the actors CSV
+    patchMoviesCSV(); // Patch the movies CSV
     cout << "[Info] Data storage to CSV files completed.\n";
 }
-
 
 // Feature Functions
 //------------------------------//
 
 // Add a new actor.
 void addActor() {
-	// Get actor details from user input.
+    // Get actor details from user input.
     string id, name;
     int birthYear;
     id = getNonEmptyInput("Enter Actor ID: ");
@@ -744,33 +734,30 @@ void addActor() {
     while (true) {
         cout << "Enter Actor Birth Year: ";
         cin >> birthYear;
-        if (cin.fail() || birthYear <= 0) {
-			// Clear error flags and ignore the rest of the input buffer.
+        if (cin.fail() || birthYear <= 0) { // Validate the birth year
             cout << "[Error] Invalid birth year. Please enter a positive integer.\n";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
         else {
-			// Clear the rest of the input buffer.
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             break;
         }
     }
-	// Create a new Actor and add it to dictionary, AVL tree, and graph.
-
+    // Create a new Actor and add it to dictionary, AVL tree, and graph.
     Actor* newActor = new Actor(id, name, birthYear);
-    if (actorDictionary.add(id, newActor)) {
+    if (actorDictionary.add(id, newActor)) { // Add the actor to the dictionary
         cout << "[Success] Actor \"" << name << "\" (ID: " << id << ") added to Dictionary successfully!\n";
-        newActors.push_back(newActor);
+        newActors.push_back(newActor); // Add the actor to the list of new actors
     }
     else {
         cout << "[Error] Actor with ID \"" << id << "\" already exists in Dictionary.\n";
         delete newActor;
         return;
     }
-    actorAVLTree.insert(newActor);
+    actorAVLTree.insert(newActor); // Insert the actor into the AVL tree
     cout << "[Success] Actor \"" << name << "\" added to AVL Tree successfully!\n";
-    actorMovieGraph.addNode(name);
+    actorMovieGraph.addNode(name); // Add the actor to the graph
     cout << "[Success] Actor \"" << name << "\" added to graph successfully!\n";
 }
 
@@ -783,7 +770,7 @@ void addMovie() {
     while (true) {
         year = getNonEmptyInput("Enter Movie Year: ");
         bool isValidYear = true;
-        for (char ch : year) {
+        for (char ch : year) { // Validate the year input
             if (!isdigit(ch)) {
                 isValidYear = false;
                 break;
@@ -795,18 +782,18 @@ void addMovie() {
             cout << "[Error] Invalid year. Please enter a year containing only digits.\n";
     }
     Movie* newMovie = new Movie(id, title, plot, year);
-    if (movieDictionary.add(id, newMovie)) {
+    if (movieDictionary.add(id, newMovie)) { // Add the movie to the dictionary
         cout << "[Success] Movie \"" << title << "\" (ID: " << id << ") added to Dictionary successfully!\n";
-        newMovies.push_back(newMovie);
+        newMovies.push_back(newMovie); // Add the movie to the list of new movies
     }
     else {
         cout << "[Error] Movie with ID \"" << id << "\" already exists in Dictionary.\n";
         delete newMovie;
         return;
     }
-    movieAVLTree.insert(newMovie);
+    movieAVLTree.insert(newMovie); // Insert the movie into the AVL tree
     cout << "[Success] Movie \"" << title << "\" added to AVL Tree successfully!\n";
-    actorMovieGraph.addNode(title);
+    actorMovieGraph.addNode(title); // Add the movie to the graph
     cout << "[Success] Movie \"" << title << "\" added to graph successfully!\n";
 }
 
@@ -815,11 +802,11 @@ void addActorToMovie() {
     string actorId, movieId;
     actorId = getNonEmptyInput("Enter Actor ID: ");
     movieId = getNonEmptyInput("Enter Movie ID: ");
-    Actor* actor = actorDictionary.get(actorId);
-    Movie* movie = movieDictionary.get(movieId);
+    Actor* actor = actorDictionary.get(actorId); // Get the actor from the dictionary
+    Movie* movie = movieDictionary.get(movieId); // Get the movie from the dictionary
     if (actor && movie) {
         bool isAlreadyCast = false;
-        for (const Movie* m : actor->movies) {
+        for (const Movie* m : actor->movies) { // Check if the actor is already cast in the movie
             if (m->id == movieId) {
                 isAlreadyCast = true;
                 break;
@@ -829,14 +816,14 @@ void addActorToMovie() {
             cout << "[Error] Actor \"" << actor->name << "\" is already part of the cast for movie \"" << movie->title << "\".\n";
             return;
         }
-        if (!actorMovieGraph.nodeExists(actor->name))
+        if (!actorMovieGraph.nodeExists(actor->name)) // Add actor to the graph if not already present
             actorMovieGraph.addNode(actor->name);
-        if (!actorMovieGraph.nodeExists(movie->title))
+        if (!actorMovieGraph.nodeExists(movie->title)) // Add movie to the graph if not already present
             actorMovieGraph.addNode(movie->title);
-        actorMovieGraph.addEdge(actor->name, movie->title);
-        actor->addMovie(movie);
-        movie->addActor(actor);
-        newCasts.emplace_back(actorId, movieId);
+        actorMovieGraph.addEdge(actor->name, movie->title); // Add an edge between actor and movie
+        actor->addMovie(movie); // Add the movie to the actor's list
+        movie->addActor(actor); // Add the actor to the movie's list
+        newCasts.emplace_back(actorId, movieId); // Add the cast relationship to the list of new casts
         cout << "[Success] Actor \"" << actor->name << "\" has been added to movie \"" << movie->title << "\" as part of the cast.\n";
     }
     else {
@@ -844,13 +831,15 @@ void addActorToMovie() {
     }
 }
 
-// Update details of an actor or a movie.h
+// Update details of an actor or a movie.
 void updateDetails() {
     int updateChoice;
     cout << "Update: (1) Actor Details, (2) Movie Details: ";
     cin >> updateChoice;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear the input buffer
+
     if (updateChoice == 1) {
+        // Update Actor Details
         string actorId = getNonEmptyInput("Enter Actor ID to update: ");
         Actor* actor = actorDictionary.get(actorId);
         if (actor) {
@@ -889,6 +878,7 @@ void updateDetails() {
         }
     }
     else if (updateChoice == 2) {
+        // Update Movie Details
         string movieId = getNonEmptyInput("Enter Movie ID to update: ");
         Movie* movie = movieDictionary.get(movieId);
         if (movie) {
@@ -990,7 +980,6 @@ void displayRecentMovies() {
     }
 }
 
-
 // Display actors within a specified age range.
 void displayActorsByAgeRange() {
     int x, y;
@@ -1088,7 +1077,6 @@ void getMoviesByActor() {
     }
 }
 
-
 // Display all actors in a given movie.
 void getActorsByMovie() {
     string movieTitle;
@@ -1133,7 +1121,6 @@ void getActorsByMovie() {
     }
 }
 
-
 // Use quick sort to display known actors (via graph traversal)
 void displayKnownActors() {
     string actorName;
@@ -1145,7 +1132,7 @@ void displayKnownActors() {
         return;
     }
 
-	// This finds the actors who have worked with the actor name inputted
+    // This finds the actors who have worked with the actor name inputted
     vector<string> level1;
     vector<string> movies = actorMovieGraph.getNeighbors(actorName);
     for (const string& movie : movies) {
@@ -1157,7 +1144,7 @@ void displayKnownActors() {
         }
     }
 
-	// This finds the actors who have worked with the actors found in the above loop
+    // This finds the actors who have worked with the actors found in the above loop
     vector<string> level2;
     for (const string& level1Actor : level1) {
         vector<string> moviesOfLevel1 = actorMovieGraph.getNeighbors(level1Actor);
@@ -1171,7 +1158,7 @@ void displayKnownActors() {
         }
     }
 
-	// Combine the actors found in both levels
+    // Combine the actors found in both levels
     vector<string> knownActors = level1;
     knownActors.insert(knownActors.end(), level2.begin(), level2.end());
 
@@ -1179,7 +1166,7 @@ void displayKnownActors() {
     if (!knownActors.empty()) {
         quickSort(knownActors, 0, knownActors.size() - 1,
             [](const string& a, const string& b) {
-                return a < b;  
+                return a < b;
             }
         );
     }
@@ -1293,7 +1280,6 @@ void rateMovieOrActor() {
         cout << "[Error] Invalid choice. Please select either 'A' for actor or 'M' for movie.\n";
     }
 }
-
 
 // Display top 10 rating for Actor or Movie
 void displayRating() {
