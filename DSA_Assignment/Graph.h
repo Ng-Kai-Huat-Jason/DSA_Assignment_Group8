@@ -38,5 +38,5 @@ public:
     }
 };
 
-#include "Graph.tpp"
+#include "Graph.cpp"
 #endif // GRAPH_H
