@@ -1,15 +1,18 @@
+
 #include "Dictionary.h"
-#include "Actor.h"  // Ensure Actor is fully defined
-#include "Movie.h"  // Ensure Movie is fully defined
-#include <cctype> // For character handling (if needed)
+#include "Actor.h"  
+#include "Movie.h" 
+#include <cctype> 
 #include <sstream>
+
+using namespace std;
 
 // Node constructor
 template <typename KeyType, typename ValueType>
 Node<KeyType, ValueType>::Node(KeyType key, ValueType* value)
     : key(key), value(value), next(nullptr) {
     if (!value) {
-        std::cerr << "Error: Node created with null value for key: " << key << std::endl;
+        cerr << "Error: Node created with null value for key: " << key << endl;
     }
 }
 
@@ -37,7 +40,7 @@ Dictionary<KeyType, ValueType>::~Dictionary() {
     }
 }
 
-// Custom hash function for std::string keys
+// Custom hash function for string keys
 template <typename KeyType, typename ValueType>
 unsigned long Dictionary<KeyType, ValueType>::hash(const KeyType& key) const {
     unsigned long hashValue = 0;
@@ -47,27 +50,30 @@ unsigned long Dictionary<KeyType, ValueType>::hash(const KeyType& key) const {
     return hashValue;
 }
 
-// Add an item
+// Add an item to the dictionary
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::add(const KeyType& key, ValueType* value) {
+
+    // Check for null value
     if (!value) {
-        std::cerr << "Error: Trying to add a null value for key: " << key << std::endl;
+        cerr << "Error: Trying to add a null value for key: " << key << endl;
         return false;
     }
 
+    // Check for duplicates
     unsigned long index = hash(key);
     Node<KeyType, ValueType>* current = table[index];
 
     // Check for duplicates
     while (current) {
         if (current->key == key) {
-            std::cerr << "Error: Duplicate key detected: " << key << std::endl;
+            cerr << "Error: Duplicate key detected: " << key << endl;
             return false;
         }
         current = current->next;
     }
 
-    // Add new node at the beginning
+    // Create a new node and insert it at the beginning of the linked list
     Node<KeyType, ValueType>* newNode = new Node<KeyType, ValueType>(key, value);
     newNode->next = table[index];
     table[index] = newNode;
@@ -75,13 +81,16 @@ bool Dictionary<KeyType, ValueType>::add(const KeyType& key, ValueType* value) {
     return true;
 }
 
-// Remove an item
+// Remove an item from the dictionary
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::remove(const KeyType& key) {
+    
+	// Find the item and remove it
     unsigned long index = hash(key);
     Node<KeyType, ValueType>* current = table[index];
     Node<KeyType, ValueType>* prev = nullptr;
 
+	// Traverse the linked list
     while (current) {
         if (current->key == key) {
             if (prev) {
@@ -101,35 +110,42 @@ bool Dictionary<KeyType, ValueType>::remove(const KeyType& key) {
     return false;
 }
 
-// Get an item
+// Get an item from the dictionary
 template <typename KeyType, typename ValueType>
 ValueType* Dictionary<KeyType, ValueType>::get(const KeyType& key) const {
+
+	// Find the item and return it
     unsigned long index = hash(key);
     Node<KeyType, ValueType>* current = table[index];
+
+	// Traverse the linked list
     while (current) {
         if (current->key == key) {
             return current->value;
         }
         current = current->next;
     }
-    return nullptr; // Not found
+
+	// Return nullptr if not found
+    return nullptr; 
 }
 
-// Check if empty
+// Check if the dictionary is empty
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::isEmpty() const {
     return size == 0;
 }
 
-// Get size
+// Get the size of the dictionary
 template <typename KeyType, typename ValueType>
 int Dictionary<KeyType, ValueType>::getSize() const {
     return size;
 }
 
-// Print the dictionary (for debugging)
+// Print the dictionary
 template <typename KeyType, typename ValueType>
 void Dictionary<KeyType, ValueType>::print() const {
+	// Traverse the hash table and print all items
     for (int i = 0; i < MAX_SIZE; ++i) {
         Node<KeyType, ValueType>* current = table[i];
         while (current) {
@@ -142,6 +158,7 @@ void Dictionary<KeyType, ValueType>::print() const {
 // getAllItems: Returns a vector of values
 template <typename KeyType, typename ValueType>
 vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
+	// Traverse the hash table and store all items in a vector
     vector<ValueType*> items;
     for (int i = 0; i < MAX_SIZE; ++i) {
         Node<KeyType, ValueType>* current = table[i];
@@ -150,10 +167,12 @@ vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
             current = current->next;
         }
     }
+
+	// Return the vector
     return items;
 }
 
-// getAllNodes: Returns a vector of Node pointers (each node contains both key and value)
+// Returns a vector of Node pointers (each node contains both key and value)
 template <typename KeyType, typename ValueType>
 vector<Node<KeyType, ValueType>*> Dictionary<KeyType, ValueType>::getAllNodes() const {
     vector<Node<KeyType, ValueType>*> nodes;

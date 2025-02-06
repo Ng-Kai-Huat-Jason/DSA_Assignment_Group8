@@ -1,21 +1,22 @@
-// DSA_Assignment.cpp : This file contains the 'main' function. 
-// Program execution begins and ends here.
 // Student 1: Ng Kai Huat Jason(S10262552)
 // Student 2: Law Ming Qi (S10257808)
 
 #include <iostream>
 #include <string>
-#include "Dictionary.h"
-#include "Actor.h"
-#include "Movie.h"
-#include "AVLTree.h"
-#include "Graph.h"
 #include <fstream>
 #include <sstream>
 #include <ctime>         // For getting the current year dynamically
 #include <limits>        // For numeric_limits
 #include <sys/stat.h>    // For fileExists
 #include <vector>
+
+#include "Actor.h"
+#include "Movie.h"
+
+#include "Dictionary.h"
+#include "AVLTree.h"
+#include "Graph.h"
+
 
 using namespace std;
 
@@ -185,6 +186,58 @@ vector<string> parseCSVLinePreserveQuotes(const string& line) {
     }
     return fields;
 }
+
+// Generalized partition function that accepts a comparison function.
+template <typename T, typename Compare>
+int partition(vector<T>& arr, int low, int high, Compare comp) {
+    T pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (comp(arr[j], pivot)) { // if arr[j] should come before pivot
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+// Generalized quick sort that accepts a comparison function.
+template <typename T, typename Compare>
+void quickSort(vector<T>& arr, int low, int high, Compare comp) {
+    if (low < high) {
+        int pi = partition(arr, low, high, comp);
+        quickSort(arr, low, pi - 1, comp);
+        quickSort(arr, pi + 1, high, comp);
+    }
+}
+
+
+// Removes duplicate strings from a sorted vector.
+void removeDuplicates(vector<string>& arr) {
+    // If the vector is empty, there's nothing to do.
+    if (arr.empty())
+        return;
+
+    // Create a temporary vector to hold unique items.
+    vector<string> temp;
+
+    // Always include the first element.
+    temp.push_back(arr[0]);
+
+    // Iterate through the vector starting from the second element.
+    for (size_t i = 1; i < arr.size(); ++i) {
+        // If the current element is different from the last unique element added,
+        // add it to the temporary vector.
+        if (arr[i] != temp.back()) {
+            temp.push_back(arr[i]);
+        }
+    }
+
+    // Replace the original vector with the vector of unique elements.
+    arr = temp;
+}
+
 
 
 
@@ -491,6 +544,7 @@ void storeDataToCsv() {
 
 // Add a new actor.
 void addActor() {
+	// Get actor details from user input.
     string id, name;
     int birthYear;
     id = getNonEmptyInput("Enter Actor ID: ");
@@ -499,15 +553,19 @@ void addActor() {
         cout << "Enter Actor Birth Year: ";
         cin >> birthYear;
         if (cin.fail() || birthYear <= 0) {
+			// Clear error flags and ignore the rest of the input buffer.
             cout << "[Error] Invalid birth year. Please enter a positive integer.\n";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
         else {
+			// Clear the rest of the input buffer.
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             break;
         }
     }
+	// Create a new Actor and add it to dictionary, AVL tree, and graph.
+
     Actor* newActor = new Actor(id, name, birthYear);
     if (actorDictionary.add(id, newActor)) {
         cout << "[Success] Actor \"" << name << "\" (ID: " << id << ") added to Dictionary successfully!\n";
@@ -683,35 +741,54 @@ void updateDetails() {
     }
 }
 
-// Display recent movies (from the past 3 years) in ascending order.
+// Display movies from a user-specified year covering the past 3 years.
 void displayRecentMovies() {
-    time_t t = time(nullptr);
-    tm currentTime;
-    localtime_s(&currentTime, &t);
-    int currentYear = 1900 + currentTime.tm_year;
+    // Prompt the user to enter a base year.
+    int baseYear;
+    while (true) {
+        cout << "Enter a base year: ";
+        cin >> baseYear;
+        if (cin.fail() || baseYear <= 0) {
+            cout << "[Error] Invalid year. Please enter a valid positive integer.\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            break;
+        }
+    }
+
+    // Calculate the lower bound (baseYear - 3) for filtering.
+    int lowerBound = baseYear - 3;
+
+    // Retrieve all movies from the dictionary.
     vector<Movie*> allMovies = movieDictionary.getAllItems();
     vector<Movie*> recentMovies;
+
+    // Filter movies that were made between lowerBound and baseYear (inclusive).
     for (Movie* movie : allMovies) {
         int movieYear = movie->getYearAsInt();
-        if (movieYear > 0 && currentYear - movieYear <= 3) {
+        if (movieYear > 0 && movieYear >= lowerBound && movieYear <= baseYear) {
             recentMovies.push_back(movie);
         }
     }
-    // Bubble sort by ascending year.
-    for (size_t i = 0; i < recentMovies.size(); ++i) {
-        for (size_t j = 0; j < recentMovies.size() - i - 1; ++j) {
-            if (recentMovies[j]->getYearAsInt() > recentMovies[j + 1]->getYearAsInt()) {
-                Movie* temp = recentMovies[j];
-                recentMovies[j] = recentMovies[j + 1];
-                recentMovies[j + 1] = temp;
+
+    // Sort the filtered movies using quick sort.
+    if (!recentMovies.empty()) {
+        quickSort(recentMovies, 0, recentMovies.size() - 1,
+            [](Movie* a, Movie* b) {
+                return a->getYearAsInt() <= b->getYearAsInt();
             }
-        }
+        );
     }
+
+    // Display the filtered and sorted movies.
     cout << "\n=====================================" << endl;
-    cout << "Recent Movies (Last 3 Years)" << endl;
+    cout << "Recent Movies (From " << lowerBound << " to " << baseYear << ")" << endl;
     cout << "=====================================" << endl;
     if (recentMovies.empty()) {
-        cout << "[Info] No recent movies found within the past 3 years.\n";
+        cout << "[Info] No movies found in the specified range (" << lowerBound << " to " << baseYear << ").\n";
     }
     else {
         for (const Movie* movie : recentMovies) {
@@ -720,6 +797,7 @@ void displayRecentMovies() {
         }
     }
 }
+
 
 // Display actors within a specified age range.
 void displayActorsByAgeRange() {
@@ -802,13 +880,12 @@ void getMoviesByActor() {
         cout << "\n[Info] Actor \"" << actorName << "\" exists but has not starred in any movie.\n";
     }
     else {
-        // Bubble sort alphabetically.
-        for (size_t i = 0; i < movies.size(); ++i) {
-            for (size_t j = i + 1; j < movies.size(); ++j) {
-                if (movies[i] > movies[j])
-                    swap(movies[i], movies[j]);
+        // Use quick sort to sort movie titles alphabetically.
+        quickSort(movies, 0, movies.size() - 1,
+            [](const string& a, const string& b) {
+                return a <= b;
             }
-        }
+        );
         cout << "\n=====================================" << endl;
         cout << "Movies Starred by " << actorName << endl;
         cout << "=====================================" << endl;
@@ -818,6 +895,7 @@ void getMoviesByActor() {
         cout << "=====================================\n" << endl;
     }
 }
+
 
 // Display all actors in a given movie.
 void getActorsByMovie() {
@@ -840,18 +918,19 @@ void getActorsByMovie() {
         cout << "\n[Error] Movie \"" << movieTitle << "\" not found in the graph.\n";
         return;
     }
+
     vector<string> actors = actorMovieGraph.getNeighbors(movieTitle);
     if (actors.empty()) {
         cout << "\n[Info] No actors found for the movie \"" << movieTitle << "\".\n";
     }
     else {
-        // Bubble sort alphabetically.
-        for (size_t i = 0; i < actors.size(); ++i) {
-            for (size_t j = i + 1; j < actors.size(); ++j) {
-                if (actors[i] > actors[j])
-                    swap(actors[i], actors[j]);
+        // Use quick sort to sort actor names alphabetically.
+        quickSort(actors, 0, actors.size() - 1,
+            [](const string& a, const string& b) {
+                return a < b; // strict less-than comparison
             }
-        }
+        );
+
         cout << "\n=====================================" << endl;
         cout << "Actors in " << movieTitle << endl;
         cout << "=====================================" << endl;
@@ -862,17 +941,75 @@ void getActorsByMovie() {
     }
 }
 
-// Use bubble sort to display known actors (via graph traversal).
+
+// Use quick sort to display known actors (via graph traversal)
 void displayKnownActors() {
     string actorName;
     cout << "Enter actor name: ";
     getline(cin, actorName);
+
     if (!actorMovieGraph.nodeExists(actorName)) {
         cout << "[Error] Actor \"" << actorName << "\" not found.\n";
         return;
     }
-    actorMovieGraph.bfs(actorName);
+
+	// This finds the actors who have worked with the actor name inputted
+    vector<string> level1;
+    vector<string> movies = actorMovieGraph.getNeighbors(actorName);
+    for (const string& movie : movies) {
+        vector<string> coActors = actorMovieGraph.getNeighbors(movie);
+        for (const string& coActor : coActors) {
+            if (coActor != actorName) {
+                level1.push_back(coActor);
+            }
+        }
+    }
+
+	// This finds the actors who have worked with the actors found in the above loop
+    vector<string> level2;
+    for (const string& level1Actor : level1) {
+        vector<string> moviesOfLevel1 = actorMovieGraph.getNeighbors(level1Actor);
+        for (const string& movie : moviesOfLevel1) {
+            vector<string> coActors = actorMovieGraph.getNeighbors(movie);
+            for (const string& coActor : coActors) {
+                if (coActor != actorName) { // Exclude the original actor
+                    level2.push_back(coActor);
+                }
+            }
+        }
+    }
+
+	// Combine the actors found in both levels
+    vector<string> knownActors = level1;
+    knownActors.insert(knownActors.end(), level2.begin(), level2.end());
+
+    // Use Quick Sort to sort the names alphabetically.
+    if (!knownActors.empty()) {
+        quickSort(knownActors, 0, knownActors.size() - 1,
+            [](const string& a, const string& b) {
+                return a < b;  
+            }
+        );
+    }
+
+    // Remove duplicates from the sorted list.
+    removeDuplicates(knownActors);
+
+    // Display the sorted list of known actors.
+    cout << "\n=====================================" << endl;
+    cout << "Actors known by " << actorName << " (sorted alphabetically):" << endl;
+    cout << "=====================================" << endl;
+    if (knownActors.empty()) {
+        cout << "[Info] No known actors found for \"" << actorName << "\".\n";
+    }
+    else {
+        for (const string& actor : knownActors) {
+            cout << " - " << actor << "\n";
+        }
+    }
+    cout << "=====================================\n" << endl;
 }
+
 
 
 

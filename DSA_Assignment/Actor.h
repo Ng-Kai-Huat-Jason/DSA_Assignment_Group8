@@ -3,16 +3,18 @@
 #include <iostream>
 #include <vector>
 
-class Movie; // Forward declaration
+using namespace std;
+
+class Movie; 
 
 class Actor {
 public:
-    std::string id;
-    std::string name;
+    string id;
+    string name;
     int birthYear;
-    std::vector<Movie*> movies;
+    vector<Movie*> movies;
 
-    Actor(std::string id, std::string name, int birthYear)
+    Actor(string id, string name, int birthYear)
         : id(id), name(name), birthYear(birthYear) {
     }
 
@@ -31,7 +33,7 @@ public:
     }
 
     // Overload << operator
-    friend std::ostream& operator<<(std::ostream& os, const Actor& actor) {
+    friend ostream& operator<<(ostream& os, const Actor& actor) {
         os << "Actor(ID: " << actor.id << ", Name: " << actor.name
             << ", Birth Year: " << actor.birthYear << ")";
         return os;

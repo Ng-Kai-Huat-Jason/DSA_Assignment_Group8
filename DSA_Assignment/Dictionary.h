@@ -7,9 +7,10 @@
 
 using namespace std;
 
-const int MAX_SIZE = 101; // Prime number for better hash distribution
+// Using Prime Number for better hash distribtuion
+// 101 is the nearest prime number to 100
+const int MAX_SIZE = 101; 
 
-// Forward declarations
 class Actor;
 class Movie;
 
@@ -36,6 +37,7 @@ public:
     Dictionary();
     ~Dictionary();
 
+	// Add, remove, get, isEmpty, getSize, print methods
     bool add(const KeyType& key, ValueType* value);
     bool remove(const KeyType& key);
     ValueType* get(const KeyType& key) const;
@@ -46,7 +48,7 @@ public:
     // Returns a vector of ValueType* (existing method)
     vector<ValueType*> getAllItems() const;
 
-    // New: Returns a vector of Node pointers (each containing both key and value)
+    // Returns a vector of Node pointers (each containing both key and value)
     vector<Node<KeyType, ValueType>*> getAllNodes() const;
 };
 
