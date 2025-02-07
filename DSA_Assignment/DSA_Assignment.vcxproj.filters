@@ -52,6 +52,6 @@
     <None Include="..\actors.csv" />
     <None Include="..\cast.csv" />
     <None Include="..\movies.csv" />
-    <None Include="Graph.tpp" />
+    <None Include="Graph.cpp" />
   </ItemGroup>
 </Project>
