@@ -19,6 +19,7 @@
 
 using namespace std;
 
+// ==================== Global Variables ====================
 // Global vectors to track new entries
 vector<Actor*> newActors;               // Stores newly added actors
 vector<Movie*> newMovies;               // Stores newly added movies
@@ -26,15 +27,14 @@ vector<pair<string, string>> newCasts;  // Stores new cast relationships (ActorI
 
 // Global data structures
 Dictionary<string, Actor> actorDictionary;  // Dictionary to store actors
-Dictionary<string, Movie> movieDictionary;    // Dictionary to store movies
-AVLTree<Actor> actorAVLTree;                  // AVL Tree to store actors
-AVLTree<Movie> movieAVLTree;                  // AVL Tree to store movies
-Graph<string> actorMovieGraph;                // Graph to represent actor-movie relationships
+Dictionary<string, Movie> movieDictionary;  // Dictionary to store movies
+AVLTree<Actor> actorAVLTree;                // AVL Tree to store actors
+AVLTree<Movie> movieAVLTree;                // AVL Tree to store movies
+Graph<string> actorMovieGraph;              // Graph to represent actor-movie relationships
 
-// Menu Functions
-//======================//
+// ==================== Menu Functions ====================
 
-// Displays the main menu.
+// Displays menu for the main menu
 void mainMenu() {
     cout << "=====================================" << endl;
     cout << "        Movie Information Helper     " << endl;
@@ -46,7 +46,7 @@ void mainMenu() {
     cout << "Enter your choice: ";
 }
 
-// Displays the admin menu.
+// Displays menu for the admin menu
 void adminMenu() {
     cout << "-------------------------------------" << endl;
     cout << "             Admin Menu              " << endl;
@@ -60,7 +60,7 @@ void adminMenu() {
     cout << "Enter your choice: ";
 }
 
-// Displays the user menu.
+// Displays menu for the user menu
 void userMenu() {
     cout << "=====================================" << endl;
     cout << "             User Menu                " << endl;
@@ -77,23 +77,21 @@ void userMenu() {
     cout << "Enter your choice: ";
 }
 
-// Helper Functions
-//======================//
-
-// Trim leading and trailing whitespace from a string.
+// ==================== Helper Functions ====================
+// Trims leading and trailing whitespace from a string.
 string trim(const string& str) {
     size_t start = str.find_first_not_of(" \t");
     size_t end = str.find_last_not_of(" \t");
     return (start == string::npos || end == string::npos) ? "" : str.substr(start, end - start + 1);
 }
 
-// Check if a file exists.
+// Check if the files exist 
 bool fileExists(const string& filename) {
     struct stat buffer;
     return (stat(filename.c_str(), &buffer) == 0);
 }
 
-// Prompt the user until a non-empty, trimmed input is provided.
+// Validator to check if input is empty
 string getNonEmptyInput(const string& prompt) {
     string input;
     while (true) {
@@ -109,7 +107,7 @@ string getNonEmptyInput(const string& prompt) {
     }
 }
 
-// Parse a CSV line into fields while respecting quotes.
+// Parses CSV Line into fields
 vector<string> parseCSVLine(const string& line) {
     vector<string> fields;
     string current;
@@ -143,7 +141,7 @@ vector<string> parseCSVLine(const string& line) {
     return fields;
 }
 
-// Parse a CSV line into fields but DO NOT remove surrounding quotes.
+// Parses CSV Line into fields while preserving quotes
 vector<string> parseCSVLinePreserveQuotes(const string& line) {
     vector<string> fields;
     string current;
@@ -175,8 +173,8 @@ vector<string> parseCSVLinePreserveQuotes(const string& line) {
     return fields;
 }
 
-
-// Generalized partition function that accepts a comparison function.
+// ==================== Sorting Functions ====================
+// Use to Partition a vector for quicksort
 template <typename T, typename Compare>
 int partition(vector<T>& arr, int low, int high, Compare comp) {
     T pivot = arr[high];
@@ -191,7 +189,7 @@ int partition(vector<T>& arr, int low, int high, Compare comp) {
     return i + 1;
 }
 
-// Generalized quick sort that accepts a comparison function.
+// Use to quicksort a vector 
 template <typename T, typename Compare>
 void quickSort(vector<T>& arr, int low, int high, Compare comp) {
     if (low < high) {
@@ -201,7 +199,7 @@ void quickSort(vector<T>& arr, int low, int high, Compare comp) {
     }
 }
 
-// Merge function for sorting actors by rating (descending order).
+// Merging two halves of a vector for merge sort (actors by rating)
 void mergeActorsByRating(vector<Actor*>& arr, int left, int mid, int right) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
@@ -233,7 +231,6 @@ void mergeActorsByRating(vector<Actor*>& arr, int left, int mid, int right) {
         k++;
     }
 }
-
 void mergeSortActorsByRating(vector<Actor*>& arr, int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;
@@ -243,7 +240,7 @@ void mergeSortActorsByRating(vector<Actor*>& arr, int left, int right) {
     }
 }
 
-// Merge function for sorting movies by rating (descending order).
+// Merging two halves of a vector for merge sort (movies by rating)
 void mergeMoviesByRating(vector<Movie*>& arr, int left, int mid, int right) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
@@ -275,7 +272,6 @@ void mergeMoviesByRating(vector<Movie*>& arr, int left, int mid, int right) {
         k++;
     }
 }
-
 void mergeSortMoviesByRating(vector<Movie*>& arr, int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;
@@ -285,7 +281,9 @@ void mergeSortMoviesByRating(vector<Movie*>& arr, int left, int right) {
     }
 }
 
-// Display the top 10 rated actors.
+// ==================== Display Functions ====================
+
+// Display top 10 actors by rating 
 void displayTopActors(const vector<Actor*>& actors) {
     cout << "\n=====================================" << endl;
     cout << "Top 10 Rated Actors" << endl;
@@ -306,7 +304,7 @@ void displayTopActors(const vector<Actor*>& actors) {
     }
 }
 
-// Display the top 10 rated movies.
+// Display top 10 movies by rating
 void displayTopMovies(const vector<Movie*>& movies) {
     cout << "\n=====================================" << endl;
     cout << "Top 10 Rated Movies" << endl;
@@ -327,7 +325,9 @@ void displayTopMovies(const vector<Movie*>& movies) {
     }
 }
 
+// ==================== Data Loading Functions ====================
 
+// load Cast Relationships from CSV 
 void loadCastsFromCSV(const string& fileName) {
     ifstream file(fileName);
     if (!file.is_open()) {
@@ -363,7 +363,9 @@ void loadCastsFromCSV(const string& fileName) {
     cout << "[Info] Casts loaded successfully from " << fileName << endl;
 }
 
-// Append new actor records to the actors CSV file.
+// ==================== Data Storage Functions ====================
+
+// Use to append new actors to CSV
 void appendNewActorsToCsv() {
     string filename = "../actors.csv";
     ofstream outFile;
@@ -392,7 +394,7 @@ void appendNewActorsToCsv() {
     }
 }
 
-// Append new movie records to the movies CSV file.
+// Use to append new movies to CSV
 void appendNewMoviesToCsv() {
     string filename = "../movies.csv";
     ofstream outFile;
@@ -421,7 +423,7 @@ void appendNewMoviesToCsv() {
     }
 }
 
-// Append new cast records to the cast CSV file.
+// Use to append new cast relationships to CSV
 void appendNewCastsToCsv() {
     string filename = "../cast.csv";
     ofstream outFile;
@@ -445,7 +447,7 @@ void appendNewCastsToCsv() {
     }
 }
 
-// Combined function to store (append new data and patch existing records) CSV files.
+// Calls are storing CSV functions into 1 function
 void storeDataToCsv() {
     cout << "[Info] Storing data to CSV files...\n";
     appendNewActorsToCsv();
@@ -457,23 +459,193 @@ void storeDataToCsv() {
     cout << "[Info] Data storage to CSV files completed.\n";
 }
 
+// ==================== Feature Functions ====================
 
+// Function to add a new actor to the system
+void addActor() {
+
+    // Prompt user to enter a ID for new actor
+    string id = getNonEmptyInput("Enter Actor ID: ");
+
+    // Prompt user to enter name for new actor
+    string name = getNonEmptyInput("Enter Actor Name: ");
+
+	// Create a variable to store the birth year
+    int birthYear;
+
+	// Loop to ensure the user enters a valid birth year
+    while (true) {
+        cout << "Enter Actor Birth Year: ";
+        cin >> birthYear;
+
+        // Check if the input is invalid (not a positive integer)
+        if (cin.fail() || birthYear <= 0) {
+            cout << "[Error] Invalid birth year. Please enter a positive integer.\n";
+
+            // Clear the error flag on cin
+            cin.clear();
+
+            // Ignore the rest of the input line to prevent further errors
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        else {
+            // If the input is valid, ignore any extra input and break the loop
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            break;
+        }
+    }
+
+    // Create a new Actor object with the provided ID, name, and birth year
+    Actor* newActor = new Actor(id, name, birthYear);
+
+    // Attempt to add the new actor to the actorDictionary
+    if (actorDictionary.add(id, newActor)) {
+
+        // If successful, print a success message and add the actor to the newActors list
+        cout << "[Success] Actor \"" << name << "\" (ID: " << id << ") added successfully!\n";
+        newActors.push_back(newActor);
+    }
+    else {
+        // If the actor ID already exists, print an error message and clean up the new actor object
+        cout << "[Error] Actor with ID \"" << id << "\" already exists.\n";
+        delete newActor;
+        return;  // Exit the function as the actor cannot be added
+    }
+
+    // Add the new actor to the AVL tree
+    actorAVLTree.insert(newActor);
+
+    // Add the actor's name as a node in the actor-movie graph
+    actorMovieGraph.addNode(name);
+
+    // Print a success message indicating the actor was added to the AVL tree and graph
+    cout << "[Success] Actor added to AVL Tree and Graph.\n";
+}
+
+// Function to add a new movie to system
+void addMovie() {
+
+	// Prompt user to enter a ID for new movie
+    string id = getNonEmptyInput("Enter Movie ID: ");
+
+	// Prompt user to enter title for new movie
+    string title = getNonEmptyInput("Enter Movie Title: ");
+
+	// Prompt user to enter plot for new movie
+    string plot = getNonEmptyInput("Enter Movie Plot: ");
+    
+	// Prompt user to enter year for new movie , reason for string is that it is stored as string for CSV compatibility
+    string year;
+
+	// Loop to ensure the user enters a valid year
+    while (true) {
+        year = getNonEmptyInput("Enter Movie Year: ");
+        if (all_of(year.begin(), year.end(), ::isdigit))
+            break;
+        else
+            cout << "[Error] Invalid year. Please enter a year containing only digits.\n";
+    }
+
+	// Create a new Movie object with the provided ID, title, plot, and year
+    Movie* newMovie = new Movie(id, title, plot, year);
+
+	// Attempt to add the new movie to the movieDictionary
+    if (movieDictionary.add(id, newMovie)) {
+        cout << "[Success] Movie \"" << title << "\" (ID: " << id << ") added successfully!\n";
+        newMovies.push_back(newMovie);
+    }
+    else {
+		// If the movie ID already exists, print an error message and clean up the new movie object
+        cout << "[Error] Movie with ID \"" << id << "\" already exists.\n";
+        delete newMovie;
+        return;
+    }
+	// Add the new movie to the AVL tree
+    movieAVLTree.insert(newMovie);
+
+	// Add the movie's title as a node in the actor-movie graph
+    actorMovieGraph.addNode(title);
+
+	// Print a success message indicating the movie was added to the AVL tree and graph
+    cout << "[Success] Movie added to AVL Tree and Graph.\n";
+}
+
+// Function to add Actor to Movie as a Cast
+void addActorToMovie() {
+	// Prompt user to enter Actor ID
+    string actorId = getNonEmptyInput("Enter Actor ID: ");
+
+	// Prompt user to enter Movie ID
+    string movieId = getNonEmptyInput("Enter Movie ID: ");
+
+	// Check if the actor and movie exist in the dictionaries
+    Actor* actor = actorDictionary.get(actorId);
+    Movie* movie = movieDictionary.get(movieId);
+
+	// If both the actor and movie exist, check if the actor is already in the movie
+    if (actor && movie) {
+        bool alreadyCast = false;
+        for (const Movie* m : actor->movies) {
+            if (m->id == movieId) {
+
+				// If the actor is already in the movie, print an error message and return
+                alreadyCast = true;
+                break;
+            }
+        }
+        if (alreadyCast) {
+            cout << "[Error] Actor \"" << actor->name << "\" is already in movie \"" << movie->title << "\".\n";
+            return;
+        }
+        
+		// Add a new edge to the actor-movie graph and update the actor and movie objects
+        actorMovieGraph.addEdge(actor->name, movie->title);
+
+		// Add the actor to the movie and the movie to the actor
+        actor->addMovie(movie);
+
+		// Add the movie to the actor and the actor to the movie
+        movie->addActor(actor);
+        
+		// Add the cast relationship to the newCasts vector
+        newCasts.emplace_back(actorId, movieId);
+
+		// Print a success message indicating the actor was added to the movie
+        cout << "[Success] Actor \"" << actor->name << "\" added to movie \"" << movie->title << "\".\n";
+    }
+    else {
+		// If the actor or movie does not exist, print an error message
+        cout << "[Error] Invalid Actor ID or Movie ID.\n";
+    }
+}
+
+// Function to update Actor details
 void updateActorDetails() {
+    
+	// Prompt user to enter Actor ID to update
     string actorId = getNonEmptyInput("Enter Actor ID to update: ");
+
+	// Check if the actor exists in the dictionary
     Actor* actor = actorDictionary.get(actorId);
     if (!actor) {
         cout << "[Error] Actor not found.\n";
         return;
     }
 
+	// Display options to update actor details
     cout << "\nUpdate Actor Details:\n";
     cout << "1. Update Name\n";
     cout << "2. Update Birth Year\n";
     cout << "3. Update Both\n";
+
+	// Get user choice
     int choice;
     cin >> choice;
+
+	// Clear the input buffer
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
+	// Update the actor's name
     if (choice == 1 || choice == 3) {
         string oldName = actor->name;
         string newName = getNonEmptyInput("Enter new Name (current: " + actor->name + "): ");
@@ -481,6 +653,8 @@ void updateActorDetails() {
         if (oldName != newName)
             actorMovieGraph.updateNode(oldName, newName);
     }
+
+	// Update the actor's birth year
     if (choice == 2 || choice == 3) {
         int newBirthYear;
         while (true) {
@@ -498,58 +672,72 @@ void updateActorDetails() {
             }
         }
     }
+
+	// Print a success message indicating the actor details were updated
     cout << "[Success] Actor details updated.\n";
-    // Re-insert into AVL tree if needed (if your tree supports updates).
+
+	// Add the updated actor to the AVL tree
     actorAVLTree.insert(actor);
 }
 
+// Function to update Movie details
 void updateMovieDetails() {
+
+    // Prompt user to enter Movie ID to update
     string movieId = getNonEmptyInput("Enter Movie ID to update: ");
+
+    // Check if the movie exists in the dictionary
     Movie* movie = movieDictionary.get(movieId);
     if (!movie) {
         cout << "[Error] Movie not found.\n";
         return;
     }
 
+    // Display options to update movie details
     cout << "\nUpdate Movie Details:\n";
     cout << "1. Update Title\n";
     cout << "2. Update Plot\n";
     cout << "3. Update Year\n";
-    cout << "4. Update Title and Plot\n";
-    cout << "5. Update Title and Year\n";
-    cout << "6. Update Plot and Year\n";
-    cout << "7. Update All (Title, Plot, and Year)\n";
+    cout << "4. Update All (Title, Plot, and Year)\n";
+    cout << "Enter your choice: ";
+
+    // Get user choice
     int choice;
     cin >> choice;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    if (choice == 1 || choice == 4 || choice == 5 || choice == 7) {
+    // Update the movie's title
+    if (choice == 1 || choice == 4) {
         string oldTitle = movie->title;
         string newTitle = getNonEmptyInput("Enter new Title (current: " + movie->title + "): ");
         movie->title = newTitle;
+
         // Ask if the title should be quoted.
         char quoteChoice;
         cout << "Should the title be quoted? (Y/N): ";
         cin >> quoteChoice;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        if (toupper(quoteChoice) == 'Y')
-            movie->titleWasQuoted = true;
-        else
-            movie->titleWasQuoted = false;
+
+        movie->titleWasQuoted = (toupper(quoteChoice) == 'Y');
+
         if (oldTitle != newTitle)
             actorMovieGraph.updateNode(oldTitle, newTitle);
     }
-    if (choice == 2 || choice == 4 || choice == 6 || choice == 7) {
+
+    // Update the movie's plot
+    if (choice == 2 || choice == 4) {
         string newPlot = getNonEmptyInput("Enter new Plot (current: " + movie->plot + "): ");
         movie->plot = newPlot;
     }
-    if (choice == 3 || choice == 5 || choice == 6 || choice == 7) {
+
+    // Update the movie's year
+    if (choice == 3 || choice == 4) {
         int newYear;
         while (true) {
             cout << "Enter new Year (current: " << movie->year << "): ";
             cin >> newYear;
             if (cin.fail() || newYear <= 0) {
-                cout << "[Error] Invalid year.\n";
+                cout << "[Error] Invalid year. Please enter a positive integer.\n";
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
             }
@@ -560,101 +748,15 @@ void updateMovieDetails() {
             }
         }
     }
+
+	// Print a success message indicating the movie details were updated
     cout << "[Success] Movie details updated.\n";
+
+	// Add the updated movie to the AVL tree
     movieAVLTree.insert(movie);
 }
 
-
-// Feature Functions
-//==============================//
-
-void addActor() {
-    string id = getNonEmptyInput("Enter Actor ID: ");
-    string name = getNonEmptyInput("Enter Actor Name: ");
-    int birthYear;
-    while (true) {
-        cout << "Enter Actor Birth Year: ";
-        cin >> birthYear;
-        if (cin.fail() || birthYear <= 0) {
-            cout << "[Error] Invalid birth year. Please enter a positive integer.\n";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-        else {
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            break;
-        }
-    }
-    Actor* newActor = new Actor(id, name, birthYear);
-    if (actorDictionary.add(id, newActor)) {
-        cout << "[Success] Actor \"" << name << "\" (ID: " << id << ") added successfully!\n";
-        newActors.push_back(newActor);
-    }
-    else {
-        cout << "[Error] Actor with ID \"" << id << "\" already exists.\n";
-        delete newActor;
-        return;
-    }
-    actorAVLTree.insert(newActor);
-    actorMovieGraph.addNode(name);
-    cout << "[Success] Actor added to AVL Tree and Graph.\n";
-}
-
-void addMovie() {
-    string id = getNonEmptyInput("Enter Movie ID: ");
-    string title = getNonEmptyInput("Enter Movie Title: ");
-    string plot = getNonEmptyInput("Enter Movie Plot: ");
-    string year;
-    while (true) {
-        year = getNonEmptyInput("Enter Movie Year: ");
-        if (all_of(year.begin(), year.end(), ::isdigit))
-            break;
-        else
-            cout << "[Error] Invalid year. Please enter a year containing only digits.\n";
-    }
-    Movie* newMovie = new Movie(id, title, plot, year);
-    if (movieDictionary.add(id, newMovie)) {
-        cout << "[Success] Movie \"" << title << "\" (ID: " << id << ") added successfully!\n";
-        newMovies.push_back(newMovie);
-    }
-    else {
-        cout << "[Error] Movie with ID \"" << id << "\" already exists.\n";
-        delete newMovie;
-        return;
-    }
-    movieAVLTree.insert(newMovie);
-    actorMovieGraph.addNode(title);
-    cout << "[Success] Movie added to AVL Tree and Graph.\n";
-}
-
-void addActorToMovie() {
-    string actorId = getNonEmptyInput("Enter Actor ID: ");
-    string movieId = getNonEmptyInput("Enter Movie ID: ");
-    Actor* actor = actorDictionary.get(actorId);
-    Movie* movie = movieDictionary.get(movieId);
-    if (actor && movie) {
-        bool alreadyCast = false;
-        for (const Movie* m : actor->movies) {
-            if (m->id == movieId) {
-                alreadyCast = true;
-                break;
-            }
-        }
-        if (alreadyCast) {
-            cout << "[Error] Actor \"" << actor->name << "\" is already in movie \"" << movie->title << "\".\n";
-            return;
-        }
-        actorMovieGraph.addEdge(actor->name, movie->title);
-        actor->addMovie(movie);
-        movie->addActor(actor);
-        newCasts.emplace_back(actorId, movieId);
-        cout << "[Success] Actor \"" << actor->name << "\" added to movie \"" << movie->title << "\".\n";
-    }
-    else {
-        cout << "[Error] Invalid Actor ID or Movie ID.\n";
-    }
-}
-
+// Function to combine both update functions
 void updateDetails() {
     int updateChoice;
     cout << "Update: (1) Actor Details, (2) Movie Details: ";
@@ -672,8 +774,13 @@ void updateDetails() {
     }
 }
 
+// Function to display recent movies ( past 3 years ) of prompted year 
 void displayRecentMovies() {
+
+	// Prompt user to enter a year
     int baseYear;
+
+	// Loop to ensure the user enters a valid year
     while (true) {
         cout << "Enter a year: ";
         cin >> baseYear;
@@ -687,9 +794,12 @@ void displayRecentMovies() {
             break;
         }
     }
+    // Get Movies 3 years past the year prompted
     int lowerBound = baseYear - 3;
     vector<Movie*> allMovies = movieDictionary.getAllItems();
     vector<Movie*> recentMovies;
+
+	// Loop through all movies and add to recentMovies if the year is within the range
     for (Movie* movie : allMovies) {
         int movieYear = movie->getYearAsInt();
         if (movieYear > 0 && movieYear >= lowerBound && movieYear <= baseYear)
@@ -700,6 +810,8 @@ void displayRecentMovies() {
             return a->getYearAsInt() <= b->getYearAsInt();
             });
     }
+
+	// Display the recent movies
     cout << "\nRecent Movies (From " << lowerBound << " to " << baseYear << "):\n";
     for (const Movie* movie : recentMovies) {
         cout << "Title: " << movie->title << "\nYear: " << movie->year
@@ -707,68 +819,114 @@ void displayRecentMovies() {
     }
 }
 
+// Function to display actors within a specified age range.
 void displayActorsByAgeRange() {
+
+    // Create variables to store the lower and upper age limits
     int x, y;
+
+    // Get the current year dynamically
     time_t t = time(nullptr);
     tm currentTime;
     localtime_s(&currentTime, &t);
+
+    // Calculate the current year based on system time
     int currentYear = 1900 + currentTime.tm_year;
+
+    // Loop to prompt for the lower age limit (x)
     while (true) {
         cout << "Enter the lower age limit (x): ";
         cin >> x;
+
+        // Validate input: Must be a non-negative integer
         if (cin.fail() || x < 0) {
-            cout << "[Error] Invalid age.\n";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "[Error] Invalid age. Please enter a non-negative integer.\n";
+            cin.clear(); // Clear error flag
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
         }
         else {
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            break;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear remaining input
+            break; // Exit loop when valid input is provided
         }
     }
+
+    // Loop to prompt for the upper age limit (y)
     while (true) {
         cout << "Enter the upper age limit (y): ";
         cin >> y;
+
+        // Validate input: Must be greater than or equal to the lower limit (x)
         if (cin.fail() || y < x) {
             cout << "[Error] Please enter an integer >= " << x << ".\n";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.clear(); // Clear error flag
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
         }
         else {
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            break;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear remaining input
+            break; // Exit loop when valid input is provided
         }
     }
+
+    // Retrieve all actors from the dictionary
     vector<Actor*> allActors = actorDictionary.getAllItems();
-    vector<Actor*> filteredActors;
+	vector<Actor*> filteredActors; // Vector to store actors within the specified age range
+
+    // Filter actors based on the specified age range (x to y)
     for (Actor* actor : allActors) {
         int age = currentYear - actor->birthYear;
-        if (age >= x && age <= y)
+        if (age >= x && age <= y) {
             filteredActors.push_back(actor);
+        }
     }
+
+    // Sort filtered actors by age in ascending order
     sort(filteredActors.begin(), filteredActors.end(), [currentYear](Actor* a, Actor* b) {
         return (currentYear - a->birthYear) < (currentYear - b->birthYear);
         });
-    cout << "\nActors Aged Between " << x << " and " << y << ":\n";
-    for (const Actor* actor : filteredActors) {
-        cout << "Name: " << actor->name << ", Age: " << (currentYear - actor->birthYear)
-            << "\n-------------------------\n";
+
+    // Display the sorted list of actors in the specified age range
+    cout << "\n=====================================" << endl;
+    cout << "Actors Aged Between " << x << " and " << y << ":" << endl;
+    cout << "=====================================" << endl;
+
+    // If no actors match the criteria, display an informative message
+    if (filteredActors.empty()) {
+        cout << "[Info] No actors found in the specified age range.\n";
+    }
+    else {
+        // Display each actor's name and calculated age
+        for (const Actor* actor : filteredActors) {
+            cout << "Name: " << actor->name
+                << " - Age: " << (currentYear - actor->birthYear)
+                << "\n-------------------------\n";
+        }
     }
 }
 
+
+// Function to get movies by actor
 void getMoviesByActor() {
+
+	// Prompt user to enter actor name
     string actorName = getNonEmptyInput("Enter actor name: ");
+
+	// Check if the actor exists in the graph
     if (!actorMovieGraph.nodeExists(actorName)) {
         cout << "[Error] Actor \"" << actorName << "\" is not found in the graph.\n";
         return;
     }
+
+	// Get all movies for the specified actor
     vector<string> movies = actorMovieGraph.listMoviesForActor(actorName);
+
+	// Display the movies starred by the actor
     cout << "\nMovies Starred by " << actorName << ":\n";
     for (const string& movie : movies) {
         cout << " - " << movie << "\n";
     }
 }
 
+// Function to get actors by movie
 void getActorsByMovie() {
     string movieTitle = getNonEmptyInput("Enter movie title: ");
     if (!actorMovieGraph.nodeExists(movieTitle)) {
@@ -787,6 +945,8 @@ void getActorsByMovie() {
     }
 }
 
+
+// Function to display actors known by a specified actor and vice versa
 void displayKnownActors() {
     string actorName = getNonEmptyInput("Enter actor name: ");
     if (!actorMovieGraph.nodeExists(actorName)) {
@@ -800,104 +960,159 @@ void displayKnownActors() {
     }
 }
 
+// Function to allow the user to rate an Actor or a Movie
 void rateMovieOrActor() {
+
+    // Prompt the user to choose between rating an Actor or a Movie
     cout << "\nDo you want to rate an Actor or a Movie? (A/M): ";
     char choice;
     cin >> choice;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
+
+    // Convert choice to uppercase for case insensitivity
     choice = toupper(choice);
+
+	// Function to rate an Actor
     if (choice == 'A') {
+
+        // Get actor name from user input
         string actorName = getNonEmptyInput("Enter the Actor Name to rate: ");
+
+        // Retrieve all actors from the dictionary
         vector<Actor*> allActors = actorDictionary.getAllItems();
-        Actor* actor = nullptr;
+        Actor* actor = nullptr; // Pointer to store the matched actor
+
+        // Search for the actor by name
         for (Actor* a : allActors) {
             if (a->name == actorName) {
                 actor = a;
-                break;
+                break; // Stop search when found
             }
         }
+
+        // If the actor is not found, display an error message
         if (!actor) {
             cout << "[Error] Actor \"" << actorName << "\" not found.\n";
             return;
         }
+
+        // Prompt user for a rating between 1 and 5 stars
         int stars;
         while (true) {
             cout << "Enter rating (1-5 stars): ";
             cin >> stars;
+
+            // Validate rating input
             if (cin.fail() || stars < 1 || stars > 5) {
                 cout << "[Error] Please enter a number between 1 and 5.\n";
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cin.clear(); // Clear error flag
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
             }
             else {
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                break;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
+                break; // Exit loop when valid input is received
             }
         }
+
+        // Update the actor's rating using the `updateRating()` function
         actor->updateRating(stars);
+
+        // Display success message with the updated rating
         cout << "[Success] Actor \"" << actor->name << "\" now has an average rating of "
             << actor->rating << " (" << actor->noOfTimesRated << " ratings).\n";
     }
+
+	// Function to rate a Movie
     else if (choice == 'M') {
+
+        // Get movie title from user input
         string movieTitle = getNonEmptyInput("Enter the Movie Title to rate: ");
+
+        // Retrieve all movies from the dictionary
         vector<Movie*> allMovies = movieDictionary.getAllItems();
-        Movie* movie = nullptr;
+        Movie* movie = nullptr; // Pointer to store the matched movie
+
+        // Search for the movie by title
         for (Movie* m : allMovies) {
             if (m->title == movieTitle) {
                 movie = m;
-                break;
+                break; // Stop search when found
             }
         }
+
+        // If the movie is not found, display an error message
         if (!movie) {
             cout << "[Error] Movie \"" << movieTitle << "\" not found.\n";
             return;
         }
+
+        // Prompt user for a rating between 1 and 5 stars
         int stars;
         while (true) {
             cout << "Enter rating (1-5 stars): ";
             cin >> stars;
+
+            // Validate rating input
             if (cin.fail() || stars < 1 || stars > 5) {
                 cout << "[Error] Please enter a number between 1 and 5.\n";
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cin.clear(); // Clear error flag
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
             }
             else {
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                break;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
+                break; // Exit loop when valid input is received
             }
         }
+
+        // Update the movie's rating using the `updateRating()` function
         movie->updateRating(stars);
+
+        // Display success message with the updated rating
         cout << "[Success] Movie \"" << movie->title << "\" now has an average rating of "
             << movie->rating << " (" << movie->noOfTimesRated << " ratings).\n";
     }
+
+    // If they didnt enter A or M , it prompts an error
     else {
         cout << "[Error] Invalid choice. Please select 'A' for actor or 'M' for movie.\n";
     }
 }
 
+// Function to display either top 10 actor or movie ratings
 void displayRating() {
+
+    // Prompt for either view top 10 actor or movie 
     cout << "\nDo you want to view Top 10 Actors or Movies? (A/M): ";
     char choice;
     cin >> choice;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    
+    // To upper so it doesnt break if its not captialize
     choice = toupper(choice);
+
+	// If the user chooses to view top 10 actors
     if (choice == 'A') {
         vector<Actor*> actors = actorDictionary.getAllItems();
         if (!actors.empty())
             mergeSortActorsByRating(actors, 0, actors.size() - 1);
         displayTopActors(actors);
     }
+
+	// If the user chooses to view top 10 movies
     else if (choice == 'M') {
         vector<Movie*> movies = movieDictionary.getAllItems();
         if (!movies.empty())
             mergeSortMoviesByRating(movies, 0, movies.size() - 1);
         displayTopMovies(movies);
     }
+    
+	// If they didnt enter A or M , it prompts an error
     else {
         cout << "[Error] Invalid choice. Please select 'A' for actors or 'M' for movies.\n";
     }
 }
 
+// ==================== Main Function ====================
 int main() {
     // Load initial data using the new Dictionary methods.
     actorDictionary.loadFromCSV("../actors.csv", true);
@@ -956,7 +1171,6 @@ int main() {
             storeDataToCsv();
             cout << "[Info] Data stored to CSV files successfully.\n";
         }
-
         else {
             cout << "[Error] Invalid input, please try again.\n";
         }
