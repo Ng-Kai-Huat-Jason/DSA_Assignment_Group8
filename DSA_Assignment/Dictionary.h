@@ -1,5 +1,4 @@
-#ifndef DICTIONARY_H
-#define DICTIONARY_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -14,21 +13,49 @@ const int MAX_SIZE = 101;
 class Actor;
 class Movie;
 
+template<typename T>
+class AVLTree;
+
 // Node structure
 template <typename KeyType, typename ValueType>
-struct Node {
+struct KeyValuePair {
     KeyType key;
     ValueType* value;
-    Node* next;
 
-    Node(KeyType key, ValueType* value);
+    // Node (KeyValuePair) constructor
+    KeyValuePair(KeyType key, ValueType* value) : key(key), value(value) {
+
+    }
+    bool operator<(const KeyValuePair& other) const {
+        return key < other.key;
+    }
+
+    bool operator>(const KeyValuePair& other) const {
+        return other < *this;
+    }
+
+    bool operator==(const KeyValuePair& other) const {
+        return key == other.key;
+    }
+
+    // And the inequality operator in terms of equality.
+    bool operator!=(const KeyValuePair& other) const {
+        return !(*this == other);
+    }
 };
+
+// Overload operator<< for KeyValuePair so that it can be printed.
+template <typename KeyType, typename ValueType>
+std::ostream& operator<<(std::ostream& os, const KeyValuePair<KeyType, ValueType>& kvp) {
+    os << "[" << kvp.key << ", " << kvp.value << "]";
+    return os;
+}
 
 // Dictionary class
 template <typename KeyType, typename ValueType>
 class Dictionary {
 private:
-    Node<KeyType, ValueType>* table[MAX_SIZE];
+    AVLTree<KeyValuePair<KeyType, ValueType>>* table[MAX_SIZE];
     int size;
 
     unsigned long hash(const KeyType& key) const;
@@ -45,17 +72,15 @@ public:
     int getSize() const;
     void print() const;
 
-    // Returns a vector of ValueType* (existing method)
+    // Returns a vector of ValueType* from all buckets (existing method)
     vector<ValueType*> getAllItems() const;
 
     // Returns a vector of Node pointers (each containing both key and value)
-    vector<Node<KeyType, ValueType>*> getAllNodes() const;
+    vector<KeyValuePair<KeyType, ValueType>*> getAllNodes() const;
 
     bool loadFromCSV(const string& fileName, bool isActor);
 
     // Patches the CSV file (updates records based on current dictionary data).
     bool patchCSV(const string& fileName, bool isActor);
-
 };
 
-#endif // DICTIONARY_H

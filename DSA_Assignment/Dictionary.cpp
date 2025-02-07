@@ -1,6 +1,8 @@
 #include "Dictionary.h"
 #include "Actor.h"
 #include "Movie.h"
+#include "AVLTree.h"
+
 #include <cctype>
 #include <sstream>
 #include <fstream>
@@ -52,15 +54,6 @@ namespace {
 // Existing implementations
 // --------------------
 
-// Node constructor
-template <typename KeyType, typename ValueType>
-Node<KeyType, ValueType>::Node(KeyType key, ValueType* value)
-    : key(key), value(value), next(nullptr) {
-    if (!value) {
-        cerr << "Error: Node created with null value for key: " << key << endl;
-    }
-}
-
 // Constructor for Dictionary
 template <typename KeyType, typename ValueType>
 Dictionary<KeyType, ValueType>::Dictionary() : size(0) {
@@ -73,15 +66,9 @@ Dictionary<KeyType, ValueType>::Dictionary() : size(0) {
 template <typename KeyType, typename ValueType>
 Dictionary<KeyType, ValueType>::~Dictionary() {
     for (int i = 0; i < MAX_SIZE; ++i) {
-        Node<KeyType, ValueType>* current = table[i];
-        while (current) {
-            Node<KeyType, ValueType>* toDelete = current;
-            current = current->next;
-            if (toDelete->value) {
-                delete toDelete->value;
-            }
-            delete toDelete;
-        }
+        if (table[i] != nullptr) {
+            delete table[i];
+        }  
     }
 }
 
@@ -95,64 +82,76 @@ unsigned long Dictionary<KeyType, ValueType>::hash(const KeyType& key) const {
     return hashValue;
 }
 
-// Add an item to the dictionary
+// Inserts a new key value pair into the dictionary
+// if the bucket's avl tree does not exist, it creates a new one
+// checks for duplicates and inserts new kvp
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::add(const KeyType& key, ValueType* value) {
     if (!value) {
         cerr << "Error: Trying to add a null value for key: " << key << endl;
         return false;
     }
-    unsigned long index = hash(key);
-    Node<KeyType, ValueType>* current = table[index];
-    while (current) {
-        if (current->key == key) {
-            cerr << "Error: Duplicate key detected: " << key << endl;
-            return false;
-        }
-        current = current->next;
+
+    unsigned long index = hash(key);  // Compute the hash bucket index
+
+    // If the AVL tree for the bucket doesn't exist, create it
+    if (table[index] == nullptr) {
+        table[index] = new AVLTree<KeyValuePair<KeyType, ValueType>>();
     }
-    Node<KeyType, ValueType>* newNode = new Node<KeyType, ValueType>(key, value);
-    newNode->next = table[index];
-    table[index] = newNode;
-    size++;
-    return true;
+
+    // Create a KeyValuePair object
+    KeyValuePair<KeyType, ValueType> kvp(key, value);
+
+    // Check if the KeyValuePair already exists in the AVL tree
+    auto found = table[index]->find(kvp);
+    if (found != nullptr) {
+        cerr << "Error: Duplicate key detected: " << key << endl;
+        return false;  // Duplicate key, insertion fails
+    }
+
+    // Insert the KeyValuePair into the AVL tree
+    table[index]->insert(kvp);
+    size++;  // Increment the size of the dictionary
+    return true;  // Successfully added
 }
 
-// Remove an item from the dictionary
+
+// Removes the key–value pair identified by key from the dictionary.
+// It returns true if the removal was successful.
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::remove(const KeyType& key) {
     unsigned long index = hash(key);
-    Node<KeyType, ValueType>* current = table[index];
-    Node<KeyType, ValueType>* prev = nullptr;
-    while (current) {
-        if (current->key == key) {
-            if (prev)
-                prev->next = current->next;
-            else
-                table[index] = current->next;
-            delete current->value;
-            delete current;
-            size--;
-            return true;
-        }
-        prev = current;
-        current = current->next;
+    if (table[index] == nullptr)
+        return false;
+
+    KeyValuePair<KeyType, ValueType> kvp(key, nullptr);
+
+    if (table[index]->find(kvp) == nullptr) {
+        return false;  
     }
-    return false;
+
+    table[index]->remove(kvp);
+    size--;
+    return true;
 }
 
-// Get an item from the dictionary
+// Returns the ValueType* associated with the given key by searching in the AVL tree of that bucket
 template <typename KeyType, typename ValueType>
 ValueType* Dictionary<KeyType, ValueType>::get(const KeyType& key) const {
     unsigned long index = hash(key);
-    Node<KeyType, ValueType>* current = table[index];
-    while (current) {
-        if (current->key == key)
-            return current->value;
-        current = current->next;
+    if (table[index] == nullptr) {
+        return nullptr;
     }
-    return nullptr;
+
+    KeyValuePair<KeyType, ValueType> kvp(key, nullptr);
+    auto found = table[index]->find(kvp);  // Find the KeyValuePair in the AVL tree
+    if (found != nullptr) {
+        return found->value;  // Return the value (ValueType*)
+    }
+
+    return nullptr;  // Return nullptr if the key is not found
 }
+
 
 // Check if the dictionary is empty
 template <typename KeyType, typename ValueType>
@@ -170,10 +169,9 @@ int Dictionary<KeyType, ValueType>::getSize() const {
 template <typename KeyType, typename ValueType>
 void Dictionary<KeyType, ValueType>::print() const {
     for (int i = 0; i < MAX_SIZE; ++i) {
-        Node<KeyType, ValueType>* current = table[i];
-        while (current) {
-            cout << "Key: " << current->key << ", Value Address: " << current->value << endl;
-            current = current->next;
+        if (table[i] != nullptr) {
+            cout << "Bucket " << i << ":\n";
+            table[i]->displayInOrder();
         }
     }
 }
@@ -183,10 +181,11 @@ template <typename KeyType, typename ValueType>
 vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
     vector<ValueType*> items;
     for (int i = 0; i < MAX_SIZE; ++i) {
-        Node<KeyType, ValueType>* current = table[i];
-        while (current) {
-            items.push_back(current->value);
-            current = current->next;
+        if (table[i] != nullptr) {
+            vector<KeyValuePair<KeyType, ValueType>> bucketItems = table[i]->getAllItems();
+            for (const auto& kvp : bucketItems) {
+                items.push_back(kvp.value);
+            }
         }
     }
     return items;
@@ -194,13 +193,14 @@ vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
 
 // Returns a vector of pointers to all nodes.
 template <typename KeyType, typename ValueType>
-vector<Node<KeyType, ValueType>*> Dictionary<KeyType, ValueType>::getAllNodes() const {
-    vector<Node<KeyType, ValueType>*> nodes;
+vector<KeyValuePair<KeyType, ValueType>*> Dictionary<KeyType, ValueType>::getAllNodes() const {
+    vector<KeyValuePair<KeyType, ValueType>*> nodes;
     for (int i = 0; i < MAX_SIZE; ++i) {
-        Node<KeyType, ValueType>* current = table[i];
-        while (current) {
-            nodes.push_back(current);
-            current = current->next;
+        if (table[i] != nullptr) {
+            vector<KeyValuePair<KeyType, ValueType>> bucketItems = table[i]->getAllItems();
+            for (const auto& kvp : bucketItems) {
+                nodes.push_back(new KeyValuePair<KeyType, ValueType>(kvp.key, kvp.value));
+            }
         }
     }
     return nodes;
