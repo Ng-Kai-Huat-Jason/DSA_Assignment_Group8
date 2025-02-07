@@ -1011,9 +1011,6 @@ void getActorsByMovie() {
 }
 
 
-
-
-
 // Function to display actors known by a specified actor and vice versa
 void displayKnownActors() {
     string actorName = getNonEmptyInput("Enter actor name: ");

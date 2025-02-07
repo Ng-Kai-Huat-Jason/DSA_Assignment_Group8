@@ -52,6 +52,8 @@
     <None Include="..\actors.csv" />
     <None Include="..\cast.csv" />
     <None Include="..\movies.csv" />
-    <None Include="Graph.cpp" />
+    <None Include="Graph.cpp">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
