@@ -100,28 +100,52 @@ template <typename T>
 void Graph<T>::bfs(const T& startNode) {
     int startIndex = getNodeIndex(startNode);
     if (startIndex == -1) {
-        cout << "[Error] Node \"" << startNode << "\" does not exist in the graph." << endl;
+        cout << "Actor \"" << startNode << "\" does not exist in the graph." << endl;
         return;
     }
 
-    // Initialize visited array and queue for BFS
+    // Initialize visited array and parent tracking
     vector<bool> visited(nodes.size(), false);
-    vector<int> toVisit;
+    vector<int> parent(nodes.size(), -1); // Tracks the parent node index
+    vector<int> toVisit;                 // List to process nodes (acts like a queue)
     toVisit.push_back(startIndex);
     visited[startIndex] = true;
 
-    // Display the actor's movies and co-actors
+    //Display the actor's movies and co-actors
     cout << startNode << " starred in:\n";
     vector<T> movies = getNeighbors(startNode);
     for (const T& movie : movies) {
-        cout << " - " << movie << ":\n";
+        cout << " \n - " << movie << ":\n";
         vector<T> coActors = getNeighbors(movie);
         for (const T& coActor : coActors) {
-            if (coActor != startNode)
+            if (coActor != startNode) {
                 cout << "    * " << coActor << "\n";
+            }
+        }
+    }
+
+    //Display the co-actors' co-actors (second-level connections)
+    cout << "\n" << startNode << " knows the following actors:\n";
+    for (const T& movie : movies) {
+        vector<T> coActors = getNeighbors(movie);
+        for (const T& coActor : coActors) {
+            if (coActor != startNode) {
+                cout << " \n - " << coActor << " starred in:\n";
+                vector<T> coActorMovies = getNeighbors(coActor);
+                for (const T& coActorMovie : coActorMovies) {
+                    vector<T> secondLevelCoActors = getNeighbors(coActorMovie);
+                    cout << "    * In movie \"" << coActorMovie << "\":\n";
+                    for (const T& secondLevelCoActor : secondLevelCoActors) {
+                        if (secondLevelCoActor != coActor && secondLevelCoActor != startNode) {
+                            cout << "      - " << secondLevelCoActor << "\n";
+                        }
+                    }
+                }
+            }
         }
     }
     cout << endl;
+
 }
 
 template <typename T>
@@ -147,7 +171,6 @@ void Graph<T>::updateNode(const T& oldNode, const T& newNode) {
     }
 }
 
-
 // List movies for an actor (assumes actor is stored as string)
 template <typename T>
 vector<T> Graph<T>::listMoviesForActor(const T& actorName) {
@@ -165,49 +188,6 @@ vector<T> Graph<T>::listActorsForMovie(const T& movieTitle) {
     sort(actors.begin(), actors.end());
     return actors;
 }
-
-template <typename T>
-vector<T> Graph<T>::getKnownActors(const T& actorName) {
-    // First, get direct co-actors: for each movie that the actor appears in,
-    // retrieve the actors in that movie (excluding the original actor).
-    vector<T> directCoActors;
-    vector<T> movies = getNeighbors(actorName); // For an actor, these should be movie nodes.
-    for (const T& movie : movies) {
-        vector<T> actors = getNeighbors(movie); // For a movie, these should be actor nodes.
-        for (const T& a : actors) {
-            if (a != actorName) {
-                directCoActors.push_back(a);
-            }
-        }
-    }
-
-    // Now, get second-level co-actors:
-    // For each direct co-actor, get the movies they appear in, then retrieve
-    // all actors from those movies (excluding the original actor).
-    vector<T> secondCoActors;
-    for (const T& coActor : directCoActors) {
-        vector<T> coActorMovies = getNeighbors(coActor); // Movies for this co-actor.
-        for (const T& movie : coActorMovies) {
-            vector<T> actors = getNeighbors(movie); // Actors for that movie.
-            for (const T& a : actors) {
-                if (a != actorName) {
-                    secondCoActors.push_back(a);
-                }
-            }
-        }
-    }
-
-    // Combine direct and second-level co-actors.
-    vector<T> knownActors = directCoActors;
-    knownActors.insert(knownActors.end(), secondCoActors.begin(), secondCoActors.end());
-
-    // Remove duplicates.
-    sort(knownActors.begin(), knownActors.end());
-    knownActors.erase(unique(knownActors.begin(), knownActors.end()), knownActors.end());
-
-    return knownActors;
-}
-
 
 // Get all nodes in the graph (const reference)
 template <typename T>

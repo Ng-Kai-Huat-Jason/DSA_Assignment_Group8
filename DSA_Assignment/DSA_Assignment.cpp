@@ -28,8 +28,6 @@ vector<pair<string, string>> newCasts;  // Stores new cast relationships (ActorI
 // Global data structures
 Dictionary<string, Actor> actorDictionary;  // Dictionary to store actors
 Dictionary<string, Movie> movieDictionary;  // Dictionary to store movies
-AVLTree<Actor> actorAVLTree;                // AVL Tree to store actors
-AVLTree<Movie> movieAVLTree;                // AVL Tree to store movies
 Graph<string> actorMovieGraph;              // Graph to represent actor-movie relationships
 
 // ==================== Menu Functions ====================
@@ -547,14 +545,11 @@ void addActor() {
         return;  // Exit the function as the actor cannot be added
     }
 
-    // Add the new actor to the AVL tree
-    actorAVLTree.insert(newActor);
-
     // Add the actor's name as a node in the actor-movie graph
     actorMovieGraph.addNode(name);
 
-    // Print a success message indicating the actor was added to the AVL tree and graph
-    cout << "[Success] Actor added to AVL Tree and Graph.\n";
+    // Print a success message indicating the actor was added to graph
+    cout << "[Success] Actor added to and Graph.\n";
 }
 
 // Function to add a new movie to system
@@ -595,14 +590,12 @@ void addMovie() {
         delete newMovie;
         return;
     }
-	// Add the new movie to the AVL tree
-    movieAVLTree.insert(newMovie);
 
 	// Add the movie's title as a node in the actor-movie graph
     actorMovieGraph.addNode(title);
 
-	// Print a success message indicating the movie was added to the AVL tree and graph
-    cout << "[Success] Movie added to AVL Tree and Graph.\n";
+	// Print a success message indicating the movie was added to graph
+    cout << "[Success] Movie added to Graph.\n";
 }
 
 // Function to add Actor to Movie as a Cast
@@ -633,6 +626,13 @@ void addActorToMovie() {
             return;
         }
         
+        if (!actorMovieGraph.nodeExists(actor->name)) {
+            actorMovieGraph.addNode(actor->name);
+        }
+
+        if (!actorMovieGraph.nodeExists(movie->title)) {
+            actorMovieGraph.addNode(movie->title);
+        }
 		// Add a new edge to the actor-movie graph and update the actor and movie objects
         actorMovieGraph.addEdge(actor->name, movie->title);
 
@@ -711,8 +711,6 @@ void updateActorDetails() {
 	// Print a success message indicating the actor details were updated
     cout << "[Success] Actor details updated.\n";
 
-	// Add the updated actor to the AVL tree
-    actorAVLTree.insert(actor);
 }
 
 // Function to update Movie details
@@ -786,9 +784,6 @@ void updateMovieDetails() {
 
 	// Print a success message indicating the movie details were updated
     cout << "[Success] Movie details updated.\n";
-
-	// Add the updated movie to the AVL tree
-    movieAVLTree.insert(movie);
 }
 
 // Function to combine both update functions
@@ -1018,11 +1013,7 @@ void displayKnownActors() {
         cout << "[Error] Actor \"" << actorName << "\" not found.\n";
         return;
     }
-    vector<string> knownActors = actorMovieGraph.getKnownActors(actorName);
-    cout << "\nActors known by " << actorName << ":\n";
-    for (const string& actor : knownActors) {
-        cout << " - " << actor << "\n";
-    }
+    actorMovieGraph.bfs(actorName);
 }
 
 // Function to allow the user to rate an Actor or a Movie

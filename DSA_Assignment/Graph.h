@@ -55,10 +55,6 @@ public:
     // Function to get all actors for a specific movie
     vector<T> listActorsForMovie(const T& movieTitle);
 
-
-	// Function to return all actors known by an actor indirectly or directly
-    vector<T> getKnownActors(const T& actorName);
-
 	// Return all nodes in the graph
     const vector<T>& getNodes() const;
 };
