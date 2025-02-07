@@ -174,114 +174,149 @@ vector<string> parseCSVLinePreserveQuotes(const string& line) {
 }
 
 // ==================== Sorting Functions ====================
-// Use to Partition a vector for quicksort
+
+// Function to partition a vector for quicksort
+// This function selects a pivot element and partitions the array such that
+// elements less than the pivot are on the left, and elements greater are on the right.
+// It returns the index of the pivot element after partitioning.
 template <typename T, typename Compare>
 int partition(vector<T>& arr, int low, int high, Compare comp) {
-    T pivot = arr[high];
-    int i = low - 1;
+    T pivot = arr[high];  // Choose the last element as the pivot
+    int i = low - 1;      // Index of the smaller element
+
+    // Iterate through the array and rearrange elements based on the comparison function
     for (int j = low; j < high; j++) {
-        if (comp(arr[j], pivot)) {
-            i++;
-            swap(arr[i], arr[j]);
+        if (comp(arr[j], pivot)) {  // If the current element is less than the pivot
+            i++;  // Increment the index of the smaller element
+            swap(arr[i], arr[j]);  // Swap the current element with the element at index i
         }
     }
-    swap(arr[i + 1], arr[high]);
-    return i + 1;
+    swap(arr[i + 1], arr[high]);  // Swap the pivot element with the element at index i+1
+    return i + 1;  // Return the partitioning index
 }
 
-// Use to quicksort a vector 
+// Function to perform quicksort on a vector
+// This function recursively sorts the vector by partitioning it around a pivot
+// and then sorting the sub-arrays before and after the pivot.
 template <typename T, typename Compare>
 void quickSort(vector<T>& arr, int low, int high, Compare comp) {
     if (low < high) {
-        int pi = partition(arr, low, high, comp);
-        quickSort(arr, low, pi - 1, comp);
-        quickSort(arr, pi + 1, high, comp);
+        int pi = partition(arr, low, high, comp);  // Partition the array and get the pivot index
+        quickSort(arr, low, pi - 1, comp);  // Recursively sort the left sub-array
+        quickSort(arr, pi + 1, high, comp);  // Recursively sort the right sub-array
     }
 }
 
-// Merging two halves of a vector for merge sort (actors by rating)
+// Function to merge two halves of a vector for merge sort (actors by rating)
+// This function merges two sorted halves of a vector of Actor pointers based on their ratings.
 void mergeActorsByRating(vector<Actor*>& arr, int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
+    int n1 = mid - left + 1;  // Size of the left sub-array
+    int n2 = right - mid;     // Size of the right sub-array
+
+    // Create temporary vectors to store the left and right sub-arrays
     vector<Actor*> L(n1), R(n2);
     for (int i = 0; i < n1; i++)
-        L[i] = arr[left + i];
+        L[i] = arr[left + i];  // Copy elements to the left sub-array
     for (int i = 0; i < n2; i++)
-        R[i] = arr[mid + 1 + i];
-    int i = 0, j = 0, k = left;
+        R[i] = arr[mid + 1 + i];  // Copy elements to the right sub-array
+
+    int i = 0, j = 0, k = left;  // Initialize indices for merging
+
+    // Merge the two sub-arrays back into the original array in sorted order
     while (i < n1 && j < n2) {
-        if (L[i]->rating >= R[j]->rating) {
-            arr[k] = L[i];
+        if (L[i]->rating >= R[j]->rating) {  // Compare ratings
+            arr[k] = L[i];  // Take the element from the left sub-array
             i++;
         }
         else {
-            arr[k] = R[j];
+            arr[k] = R[j];  // Take the element from the right sub-array
             j++;
         }
         k++;
     }
+
+    // Copy any remaining elements from the left sub-array
     while (i < n1) {
         arr[k] = L[i];
         i++;
         k++;
     }
+
+    // Copy any remaining elements from the right sub-array
     while (j < n2) {
         arr[k] = R[j];
         j++;
         k++;
     }
 }
+
+// Function to perform merge sort on a vector of Actor pointers by rating
+// This function recursively divides the vector into two halves, sorts them, and then merges them.
 void mergeSortActorsByRating(vector<Actor*>& arr, int left, int right) {
     if (left < right) {
-        int mid = left + (right - left) / 2;
-        mergeSortActorsByRating(arr, left, mid);
-        mergeSortActorsByRating(arr, mid + 1, right);
-        mergeActorsByRating(arr, left, mid, right);
+        int mid = left + (right - left) / 2;  // Find the middle point
+        mergeSortActorsByRating(arr, left, mid);  // Sort the left half
+        mergeSortActorsByRating(arr, mid + 1, right);  // Sort the right half
+        mergeActorsByRating(arr, left, mid, right);  // Merge the sorted halves
     }
 }
 
-// Merging two halves of a vector for merge sort (movies by rating)
+// Function to merge two halves of a vector for merge sort (movies by rating)
+// This function merges two sorted halves of a vector of Movie pointers based on their ratings.
 void mergeMoviesByRating(vector<Movie*>& arr, int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
+    int n1 = mid - left + 1;  // Size of the left sub-array
+    int n2 = right - mid;     // Size of the right sub-array
+
+    // Create temporary vectors to store the left and right sub-arrays
     vector<Movie*> L(n1), R(n2);
     for (int i = 0; i < n1; i++)
-        L[i] = arr[left + i];
+        L[i] = arr[left + i];  // Copy elements to the left sub-array
     for (int i = 0; i < n2; i++)
-        R[i] = arr[mid + 1 + i];
-    int i = 0, j = 0, k = left;
+        R[i] = arr[mid + 1 + i];  // Copy elements to the right sub-array
+
+    int i = 0, j = 0, k = left;  // Initialize indices for merging
+
+    // Merge the two sub-arrays back into the original array in sorted order
     while (i < n1 && j < n2) {
-        if (L[i]->rating >= R[j]->rating) {
-            arr[k] = L[i];
+        if (L[i]->rating >= R[j]->rating) {  // Compare ratings
+            arr[k] = L[i];  // Take the element from the left sub-array
             i++;
         }
         else {
-            arr[k] = R[j];
+            arr[k] = R[j];  // Take the element from the right sub-array
             j++;
         }
         k++;
     }
+
+    // Copy any remaining elements from the left sub-array
     while (i < n1) {
         arr[k] = L[i];
         i++;
         k++;
     }
+
+    // Copy any remaining elements from the right sub-array
     while (j < n2) {
         arr[k] = R[j];
         j++;
         k++;
     }
 }
+
+// Function to perform merge sort on a vector of Movie pointers by rating
+// This function recursively divides the vector into two halves, sorts them, and then merges them.
 void mergeSortMoviesByRating(vector<Movie*>& arr, int left, int right) {
     if (left < right) {
-        int mid = left + (right - left) / 2;
-        mergeSortMoviesByRating(arr, left, mid);
-        mergeSortMoviesByRating(arr, mid + 1, right);
-        mergeMoviesByRating(arr, left, mid, right);
+        int mid = left + (right - left) / 2;  // Find the middle point
+        mergeSortMoviesByRating(arr, left, mid);  // Sort the left half
+        mergeSortMoviesByRating(arr, mid + 1, right);  // Sort the right half
+        mergeMoviesByRating(arr, left, mid, right);  // Merge the sorted halves
     }
 }
 
-// ==================== Display Functions ====================
+
+// ==================== Display Functions for Top 10 Actor or Movie  ====================
 
 // Display top 10 actors by rating 
 void displayTopActors(const vector<Actor*>& actors) {
@@ -1114,18 +1149,24 @@ void displayRating() {
 
 // ==================== Main Function ====================
 int main() {
-    // Load initial data using the new Dictionary methods.
+
+    // Load initial data using Dictionary methods.
     actorDictionary.loadFromCSV("../actors.csv", true);
     movieDictionary.loadFromCSV("../movies.csv", false);
-    // Load cast relationships (remains in main because it involves multiple data structures).
+
+    // Load cast relationships
     loadCastsFromCSV("../cast.csv");
 
     while (true) {
+
+		// Display the main menu and prompt the user for a choice
         mainMenu();
         int choice;
         cin >> choice;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        if (choice == 1) { // Admin
+
+        // If Choice is 1 , opens admin menu
+        if (choice == 1) { 
             while (true) {
                 adminMenu();
                 int adminChoice;
@@ -1144,7 +1185,9 @@ int main() {
                 }
             }
         }
-        else if (choice == 2) { // User
+
+		// If Choice is 2 , opens user menu
+        else if (choice == 2) { 
             while (true) {
                 userMenu();
                 int userChoice;
@@ -1166,8 +1209,9 @@ int main() {
                 }
             }
         }
+
+		// If Choice is 3 , calls storeDataToCsv function which calls all functions needed to append and save to CSV
         else if (choice == 3) {
-            // Store updates to CSV files: first append new records, then patch updated records.
             storeDataToCsv();
             cout << "[Info] Data stored to CSV files successfully.\n";
         }
