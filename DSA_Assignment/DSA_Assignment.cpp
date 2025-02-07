@@ -963,22 +963,55 @@ void getMoviesByActor() {
 
 // Function to get actors by movie
 void getActorsByMovie() {
+    // Prompt the user for the movie title.
     string movieTitle = getNonEmptyInput("Enter movie title: ");
+
+    // First, check if the movie node exists exactly as entered.
     if (!actorMovieGraph.nodeExists(movieTitle)) {
-        // Try with quotes
+        // Prepare a variant with quotes.
         string quotedTitle = "\"" + movieTitle + "\"";
-        if (!actorMovieGraph.nodeExists(quotedTitle)) {
-            cout << "[Error] Movie \"" << movieTitle << "\" not found.\n";
+        if (actorMovieGraph.nodeExists(quotedTitle)) {
+            movieTitle = quotedTitle;
+        }
+        else {
+            // Movie node not found in the graph.
+            // Instead of using movieDictionary.get (which uses the ID as key),
+            // search through all movies for a matching title.
+            Movie* movieObj = nullptr;
+            vector<Movie*> allMovies = movieDictionary.getAllItems();
+            for (Movie* m : allMovies) {
+                // Compare the stored title with the input title.
+                if (m->title == movieTitle) {
+                    movieObj = m;
+                    break;
+                }
+            }
+            if (movieObj) {
+                cout << "[Info] Movie \"" << movieTitle
+                    << "\" exists but has no cast recorded.\n";
+            }
+            else {
+                cout << "[Error] Movie \"" << movieTitle << "\" not found.\n";
+            }
             return;
         }
-        movieTitle = quotedTitle;
     }
+
+    // Retrieve the list of actors from the graph.
     vector<string> actors = actorMovieGraph.listActorsForMovie(movieTitle);
-    cout << "\nActors in " << movieTitle << ":\n";
-    for (const string& actor : actors) {
-        cout << " - " << actor << "\n";
+    if (actors.empty()) {
+        cout << "[Info] There are no actors in the movie \"" << movieTitle << "\".\n";
+    }
+    else {
+        cout << "\nActors in " << movieTitle << ":\n";
+        for (const string& actor : actors) {
+            cout << " - " << actor << "\n";
+        }
     }
 }
+
+
+
 
 
 // Function to display actors known by a specified actor and vice versa
