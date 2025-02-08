@@ -1,79 +1,128 @@
 #include "Graph.h"
-#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <string>
+
+// Note: We do not include <algorithm> because we implement our own quicksort here.
+
+// -------------------------
+// QuickSort Helper Functions
+// (These are not exposed in the header.)
+// -------------------------
+
+// Swaps two elements.
+template <typename T>
+void swapElements(T& a, T& b) {
+    T temp = a;
+    a = b;
+    b = temp;
+}
+
+// Partition function for quicksort (ascending order).
+template <typename T>
+int partition(std::vector<T>& arr, int low, int high) {
+    T pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            swapElements(arr[i], arr[j]);
+        }
+    }
+    swapElements(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+// QuickSort implementation.
+template <typename T>
+void quickSort(std::vector<T>& arr, int low, int high) {
+    if (low < high) {
+        int p = partition(arr, low, high);
+        quickSort(arr, low, p - 1);
+        quickSort(arr, p + 1, high);
+    }
+}
+
+// -------------------------
+// Graph<T> Member Function Implementations
+// -------------------------
 
 // Constructor
 template <typename T>
 Graph<T>::Graph() : count(0) {
-    // Initially, the graph is empty
+    // Initially, the graph is empty.
 }
 
-// Check if a node exists in the graph
+// Check if a node exists in the graph.
 template <typename T>
 bool Graph<T>::nodeExists(const T& node) {
-    return getNodeIndex(node) != -1; // Returns true if the node exists (index is not -1)
+    return getNodeIndex(node) != -1;
 }
 
-// Get the index of a node in the nodes vector
+// Get the index of a node in the nodes vector.
 template <typename T>
 int Graph<T>::getNodeIndex(const T& node) {
-    auto it = find(nodes.begin(), nodes.end(), node);
-    if (it != nodes.end()) {
-        return static_cast<int>(distance(nodes.begin(), it));
+    for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
+        if (nodes[i] == node)
+            return i;
     }
-    return -1; // Node not found
+    return -1; // Node not found.
 }
 
-// Add a new node to the graph
+// Add a new node to the graph.
 template <typename T>
 void Graph<T>::addNode(const T& node) {
-    if (getNodeIndex(node) == -1) { // Avoid duplicates
+    if (getNodeIndex(node) == -1) { // Avoid duplicates.
         nodes.push_back(node);
         count++;
 
-        // Resize the adjacency matrix to accommodate the new node
-        for (auto& row : adjacencyMatrix) {
-            row.push_back(0); // Add a column for the new node
+        // Resize the adjacency matrix: add one column to each existing row.
+        for (size_t i = 0; i < adjacencyMatrix.size(); i++) {
+            adjacencyMatrix[i].push_back(0);
         }
-        adjacencyMatrix.push_back(vector<int>(count, 0)); // Add a row for the new node
+        // Add a new row for the new node.
+        adjacencyMatrix.push_back(std::vector<int>(count, 0));
     }
 }
 
-// Remove a node from the graph
+// Remove a node from the graph.
 template <typename T>
 void Graph<T>::removeNode(const T& node) {
     int nodeIndex = getNodeIndex(node);
     if (nodeIndex == -1)
-        return; // Node not found
+        return; // Node not found.
 
-    // Remove from nodes vector
+    // Remove node from the nodes vector.
     nodes.erase(nodes.begin() + nodeIndex);
 
-    // Remove from adjacency matrix
+    // Remove the corresponding row from the adjacency matrix.
     adjacencyMatrix.erase(adjacencyMatrix.begin() + nodeIndex);
-    for (auto& row : adjacencyMatrix) {
-        row.erase(row.begin() + nodeIndex);
+    // Remove the corresponding column from each remaining row.
+    for (size_t i = 0; i < adjacencyMatrix.size(); i++) {
+        adjacencyMatrix[i].erase(adjacencyMatrix[i].begin() + nodeIndex);
     }
 }
 
-// Add an edge to the graph
+// Add an edge to the graph (undirected).
 template <typename T>
 void Graph<T>::addEdge(const T& source, const T& destination) {
     int srcIndex = getNodeIndex(source);
     int destIndex = getNodeIndex(destination);
 
     if (srcIndex == -1 || destIndex == -1) {
-        cout << "[Error] One or both nodes not found in the graph: \"" << source << "\", \"" << destination << "\"\n";
+        std::cout << "[Error] One or both nodes not found in the graph: \""
+            << source << "\", \"" << destination << "\"\n";
         return;
     }
     adjacencyMatrix[srcIndex][destIndex] = 1;
     adjacencyMatrix[destIndex][srcIndex] = 1;
 }
 
-// Get neighbors of a node
+// Get neighbors of a node.
 template <typename T>
-vector<T> Graph<T>::getNeighbors(const T& node) {
+std::vector<T> Graph<T>::getNeighbors(const T& node) {
     int nodeIndex = getNodeIndex(node);
-    vector<T> neighbors;
+    std::vector<T> neighbors;
     if (nodeIndex == -1)
         return neighbors;
     for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
@@ -84,116 +133,112 @@ vector<T> Graph<T>::getNeighbors(const T& node) {
     return neighbors;
 }
 
-// Display the adjacency matrix of the graph
+// Display the adjacency matrix.
 template <typename T>
 void Graph<T>::displayMatrix() const {
-    for (const auto& row : adjacencyMatrix) {
-        for (int value : row) {
-            cout << value << " ";
+    for (size_t i = 0; i < adjacencyMatrix.size(); i++) {
+        for (size_t j = 0; j < adjacencyMatrix[i].size(); j++) {
+            std::cout << adjacencyMatrix[i][j] << " ";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 }
 
-// Breadth-first search (BFS) starting from a given node
+// Breadth-first search (BFS) starting from a given node.
 template <typename T>
 void Graph<T>::bfs(const T& startNode) {
     int startIndex = getNodeIndex(startNode);
     if (startIndex == -1) {
-        cout << "Actor \"" << startNode << "\" does not exist in the graph." << endl;
+        std::cout << "Actor \"" << startNode << "\" does not exist in the graph." << std::endl;
         return;
     }
 
-    // Initialize visited array and parent tracking
-    vector<bool> visited(nodes.size(), false);
-    vector<int> parent(nodes.size(), -1); // Tracks the parent node index
-    vector<int> toVisit;                 // List to process nodes (acts like a queue)
+    // Initialize visited array and parent tracking.
+    std::vector<bool> visited(nodes.size(), false);
+    std::vector<int> parent(nodes.size(), -1);
+    std::vector<int> toVisit;
     toVisit.push_back(startIndex);
     visited[startIndex] = true;
 
-    //Display the actor's movies and co-actors
-    cout << startNode << " starred in:\n";
-    vector<T> movies = getNeighbors(startNode);
-    for (const T& movie : movies) {
-        cout << " \n - " << movie << ":\n";
-        vector<T> coActors = getNeighbors(movie);
-        for (const T& coActor : coActors) {
-            if (coActor != startNode) {
-                cout << "    * " << coActor << "\n";
-            }
+    // Display the actor's movies and co-actors.
+    std::cout << startNode << " starred in:\n";
+    std::vector<T> movies = getNeighbors(startNode);
+    for (size_t i = 0; i < movies.size(); i++) {
+        std::cout << "\n - " << movies[i] << ":\n";
+        std::vector<T> coActors = getNeighbors(movies[i]);
+        for (size_t j = 0; j < coActors.size(); j++) {
+            if (coActors[j] != startNode)
+                std::cout << "    * " << coActors[j] << "\n";
         }
     }
 
-    //Display the co-actors' co-actors (second-level connections)
-    cout << "\n" << startNode << " knows the following actors:\n";
-    for (const T& movie : movies) {
-        vector<T> coActors = getNeighbors(movie);
-        for (const T& coActor : coActors) {
-            if (coActor != startNode) {
-                cout << " \n - " << coActor << " starred in:\n";
-                vector<T> coActorMovies = getNeighbors(coActor);
-                for (const T& coActorMovie : coActorMovies) {
-                    vector<T> secondLevelCoActors = getNeighbors(coActorMovie);
-                    cout << "    * In movie \"" << coActorMovie << "\":\n";
-                    for (const T& secondLevelCoActor : secondLevelCoActors) {
-                        if (secondLevelCoActor != coActor && secondLevelCoActor != startNode) {
-                            cout << "      - " << secondLevelCoActor << "\n";
-                        }
+    // Display the co-actors' co-actors (second-level connections).
+    std::cout << "\n" << startNode << " knows the following actors:\n";
+    for (size_t i = 0; i < movies.size(); i++) {
+        std::vector<T> coActors = getNeighbors(movies[i]);
+        for (size_t j = 0; j < coActors.size(); j++) {
+            if (coActors[j] != startNode) {
+                std::cout << "\n - " << coActors[j] << " starred in:\n";
+                std::vector<T> coActorMovies = getNeighbors(coActors[j]);
+                for (size_t k = 0; k < coActorMovies.size(); k++) {
+                    std::vector<T> secondLevelCoActors = getNeighbors(coActorMovies[k]);
+                    std::cout << "    * In movie \"" << coActorMovies[k] << "\":\n";
+                    for (size_t l = 0; l < secondLevelCoActors.size(); l++) {
+                        if (secondLevelCoActors[l] != coActors[j] && secondLevelCoActors[l] != startNode)
+                            std::cout << "      - " << secondLevelCoActors[l] << "\n";
                     }
                 }
             }
         }
     }
-    cout << endl;
-
+    std::cout << std::endl;
 }
 
+// Update a node in the graph.
 template <typename T>
 void Graph<T>::updateNode(const T& oldNode, const T& newNode) {
     int idx = getNodeIndex(oldNode);
     if (idx == -1) {
-        // Instead of erroring out, simply add the new node.
-        cout << "[Warning] Node \"" << oldNode << "\" not found in the graph. Adding new node \"" << newNode << "\" instead.\n";
+        std::cout << "[Warning] Node \"" << oldNode
+            << "\" not found in the graph. Adding new node \""
+            << newNode << "\" instead.\n";
         addNode(newNode);
         return;
     }
-    // Save the current neighbor list
-    vector<T> neighbors = getNeighbors(oldNode);
-    // Remove the old node completely
+    std::vector<T> neighbors = getNeighbors(oldNode);
     removeNode(oldNode);
-    // Add the new node
     addNode(newNode);
-    // Reconnect all neighbors to the new node
-    for (const T& neighbor : neighbors) {
-        if (neighbor != newNode) { // Avoid duplicate edge
-            addEdge(newNode, neighbor);
-        }
+    for (size_t i = 0; i < neighbors.size(); i++) {
+        if (neighbors[i] != newNode)
+            addEdge(newNode, neighbors[i]);
     }
 }
 
-// List movies for an actor (assumes actor is stored as string)
+// List movies for an actor (assumes actor is stored as string).
 template <typename T>
-vector<T> Graph<T>::listMoviesForActor(const T& actorName) {
-    vector<T> movies = getNeighbors(actorName);
-    // Sort alphabetically
-    sort(movies.begin(), movies.end());
+std::vector<T> Graph<T>::listMoviesForActor(const T& actorName) {
+    std::vector<T> movies = getNeighbors(actorName);
+    if (!movies.empty()) {
+        quickSort(movies, 0, static_cast<int>(movies.size()) - 1);
+    }
     return movies;
 }
 
-// List actors for a movie
+// List actors for a movie (assumes movie is stored as string).
 template <typename T>
-vector<T> Graph<T>::listActorsForMovie(const T& movieTitle) {
-    vector<T> actors = getNeighbors(movieTitle);
-    // Sort alphabetically
-    sort(actors.begin(), actors.end());
+std::vector<T> Graph<T>::listActorsForMovie(const T& movieTitle) {
+    std::vector<T> actors = getNeighbors(movieTitle);
+    if (!actors.empty()) {
+        quickSort(actors, 0, static_cast<int>(actors.size()) - 1);
+    }
     return actors;
 }
 
-// Get all nodes in the graph (const reference)
+// Return all nodes in the graph.
 template <typename T>
-const vector<T>& Graph<T>::getNodes() const {
+const std::vector<T>& Graph<T>::getNodes() const {
     return nodes;
 }
 
-// Explicit template instantiation for type string
-template class Graph<string>;
+// Explicit template instantiation for type string.
+template class Graph<std::string>;
