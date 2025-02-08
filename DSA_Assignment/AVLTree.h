@@ -64,19 +64,42 @@ public:
 };
 
 
-// Returns the height of a node. If the node is null, returns 0.
+/*
+    Gets the height of a given node in the AVL tree
+
+	This functions returns the height of the node, or 0 if the node is null.
+
+    Parameter - node: A pointer to the AVL tree node whose height is to be retrieved
+    Return - The height of the node, or 0 if the node is null
+*/
 template <typename T>
 int AVLTree<T>::getHeight(AVLNode<T>* node) const {
     return node ? node->height : 0;
 }
 
-// Calculates the balance factor of a node (difference in heights of left and right subtrees).
+/*
+    Calculates the balance factor of a node in the AVL tree
+
+	This function gets the balance factor of the given node, which is the difference in heights of its left and right sub trees
+	A positive balance factor indicates a left-heavy tree, while a negative balance factor indicates a right-heavy tree.
+
+    Parameter - node: A pointer to the AVL tree node whose balance factor is to be calculated
+    Return - The balance factor (difference in heights of left and right subtrees), or 0 if the node is null
+*/
 template <typename T>
 int AVLTree<T>::getBalanceFactor(AVLNode<T>* node) const {
     return node ? getHeight(node->left) - getHeight(node->right) : 0;
 }
 
-// Performs a right rotation on the given node (y) and returns the new root of the subtree.
+/*
+    Performs a right rotation on the given node in the AVL tree
+
+    This functions rotates the node ( y ) to the right and making its left child ( x ) the new root of the sub tree
+	The right sub tree of x is reassigned to y and heights are updated
+
+    Parameter - y: A pointer to the node that needs to be rotated
+    Return - A pointer to the new root of the rotated subtree
+*/
 template <typename T>
 AVLNode<T>* AVLTree<T>::rotateRight(AVLNode<T>* y) {
     AVLNode<T>* x = y->left;
@@ -93,7 +116,15 @@ AVLNode<T>* AVLTree<T>::rotateRight(AVLNode<T>* y) {
     return x; // Return new root
 }
 
-// Performs a left rotation on the given node (x) and returns the new root of the subtree.
+/*
+    Performs a left rotation on the given node in the AVL tree
+
+    This function rotates the given node ( x ) to the left, making its right child ( y ) the new root of the subtree. 
+    The left subtree of y is reassigned to x, and heights are updated accordingly.
+
+    Parameter - x: A pointer to the node that needs to be rotated
+    Return - A pointer to the new root of the rotated subtree
+*/
 template <typename T>
 AVLNode<T>* AVLTree<T>::rotateLeft(AVLNode<T>* x) {
     AVLNode<T>* y = x->right;
@@ -110,7 +141,15 @@ AVLNode<T>* AVLTree<T>::rotateLeft(AVLNode<T>* x) {
     return y; // Return new root
 }
 
-// Inserts a new node with the given data into the AVL Tree and balances the tree if necessary.
+/*
+    Performs a left rotation on the given node in the AVL tree
+
+    This function rotates the given node ( x ) to the left, making its right child ( y ) the new root of the subtree.
+    The left subtree of y is reassigned to x, and heights are updated accordingly.
+
+    Parameter - x: A pointer to the node that needs to be rotated
+    Return - A pointer to the new root of the rotated subtree
+*/
 template <typename T>
 AVLNode<T>* AVLTree<T>::insert(AVLNode<T>* node, T data) {
     if (!node)
@@ -147,13 +186,27 @@ AVLNode<T>* AVLTree<T>::insert(AVLNode<T>* node, T data) {
     return node; // Return the (possibly updated) node
 }
 
-// Insert to AVL Tree
+/*
+    Inserts a new node with the given data into the AVL Tree
+
+    This function inserts the data into the AVL Tree by calling the recursive insert function.
+    It ensures the tree remains balanced after insertion.
+
+    Parameter - data: The data to be inserted into the AVL Tree
+*/
 template <typename T>
 void AVLTree<T>::insert(T data) {
     root = insert(root, data);
 }
 
-// Finds the node with the minimum value in the subtree rooted at the given node.
+/*
+    Finds the node with the minimum value in the subtree rooted at the given node.
+
+    This function traverses the left subtree of the given node to find and return the node with the minimum value
+
+    Parameter - node: A pointer to the root of the subtree to search
+    Return - A pointer to the node with the minimum value in the subtree
+*/
 template <typename T>
 AVLNode<T>* AVLTree<T>::minValueNode(AVLNode<T>* node) const {
     AVLNode<T>* current = node;
@@ -162,7 +215,17 @@ AVLNode<T>* AVLTree<T>::minValueNode(AVLNode<T>* node) const {
     return current;
 }
 
-// Removes a node with the given data from the AVL Tree and balances the tree if necessary.
+/*
+    Removes a node with the given data from the AVL Tree and balances the tree if necessary.
+
+    This functions is called recursively and searches and removes the node containing the requested data.
+	After removing, it updates the heights of the affected nodes and rotates to maintain balance in the AVL tree.
+	It handles this 3 cases : nodes with no children, nodes with one child and nodes with two children (using the inorder successor)
+
+    Parameter - node: A pointer to the root of the subtree to search
+    Parameter - data: The data of the node to be removed
+    Return - A pointer to the root of the (possibly updated) subtree after removal and balancing
+*/
 template <typename T>
 AVLNode<T>* AVLTree<T>::remove(AVLNode<T>* node, const T& data) {
     if (!node)
@@ -213,13 +276,29 @@ AVLNode<T>* AVLTree<T>::remove(AVLNode<T>* node, const T& data) {
     return node; // Return the (possibly updated) node
 }
 
-// Remove Data from AVL Tree
+/*
+    Removes a node with the given data from the AVL Tree.
+
+	This function is called doing the removing of the node from the AVL Tree
+    It make sures the tree is balanced after removing
+
+    Parameter - data: The data of the node to be removed from the AVL Tree
+*/
 template <typename T>
 void AVLTree<T>::remove(const T& data) {
     root = remove(root, data);
 }
 
-// Finds a node with the given data in the AVL Tree.
+/*
+    Finds a node with the given data in the AVL Tree.
+
+    This functions recursively searches for the node with the requested data.
+	It traveses the tree based on the comparison of the data with the current node's data,searching the left and right subtree accordingly.
+
+    Parameter - node: A pointer to the root of the subtree to search
+    Parameter - data: The data to search for in the AVL Tree
+    Return - A pointer to the node containing the data, or nullptr if the data is not found
+*/
 template <typename T>
 AVLNode<T>* AVLTree<T>::find(AVLNode<T>* node, const T& data) const {
     if (!node || node->data == data)
@@ -229,14 +308,30 @@ AVLNode<T>* AVLTree<T>::find(AVLNode<T>* node, const T& data) const {
     return find(node->right, data);    // Search in the right subtree
 }
 
-// Find data in AVL Tree , return nullptr if not found else return pointer to data
+/*
+    Finds data in the AVL Tree and returns a pointer to it.
+
+    This function searches for the given data in the Tree by calling a recursive find function.
+	If the data is found, it returns a pointer to the data else it returns a nullptr
+
+    Parameter - data: The data to search for in the AVL Tree
+    Return - A pointer to the data if found, otherwise nullptr
+*/
 template <typename T>
 T* AVLTree<T>::find(const T& data) const {
     AVLNode<T>* foundNode = find(root, data);
     return foundNode ? &(foundNode->data) : nullptr;
 }
 
-// Performs in-order traversal of the AVL Tree and stores the elements in a vector.
+/*
+    Performs in-order traversal of the AVL Tree and stores the elements in a vector.
+
+    This function recursively traverses the AVL Tree in in-order (left, root, right) manner and stores the elements of the tree in a vector. 
+    The vector will contain the elements in ascending order.
+
+    Parameter - node: A pointer to the root of the subtree to traverse
+    Parameter - items: A reference to a vector to store the elements of the tree
+*/
 template <typename T>
 void AVLTree<T>::inOrderTraversal(AVLNode<T>* node, vector<T>& items) const {
     if (node) {
@@ -246,7 +341,14 @@ void AVLTree<T>::inOrderTraversal(AVLNode<T>* node, vector<T>& items) const {
     }
 }
 
-// Returns all elements in the AVL Tree in sorted order.
+/*
+    Returns all elements in the AVL Tree in sorted order.
+
+    This function performs an in-order traversal of the AVL Tree and collects all elements into a vector. 
+    The elements are returned in ascending order.
+
+    Return - A vector containing all elements of the AVL Tree in sorted order
+*/
 template <typename T>
 vector<T> AVLTree<T>::getAllItems() const {
     vector<T> items;
@@ -254,7 +356,13 @@ vector<T> AVLTree<T>::getAllItems() const {
     return items;
 }
 
-// Recursively deletes all nodes in the AVL Tree.
+/*
+    Recursively deletes all nodes in the AVL Tree.
+
+	This function is called recursively to delete all nodes in the AVL Tree.
+
+    Parameter - node: A pointer to the root of the subtree to delete
+*/
 template <typename T>
 void AVLTree<T>::destroy(AVLNode<T>* node) {
     if (node) {
@@ -270,7 +378,13 @@ AVLTree<T>::~AVLTree() {
     destroy(root);
 }
 
-// Displays all elements in the AVL Tree in sorted order.
+/*
+    Displays all elements in the AVL Tree in sorted order.
+
+    This function retrieves all elements in the AVL Tree using `getAllItems` and prints them in ascending order.
+
+    Output - Prints each element of the AVL Tree to the standard output, one per line
+*/
 template <typename T>
 void AVLTree<T>::displayInOrder() const {
     vector<T> items = getAllItems();
