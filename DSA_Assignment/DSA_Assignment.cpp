@@ -561,6 +561,7 @@ void addActor() {
     cout << "[Success] Actor added to and Graph.\n";
 }
 
+// Function to add a new Movie to the system
 void addMovie() {
     // Prompt user to enter an ID for new movie
     string id = getNonEmptyInput("Enter Movie ID: ");
@@ -600,7 +601,6 @@ void addMovie() {
 
     cout << "[Success] Movie added to Graph.\n";
 }
-
 
 // Function to add Actor to Movie as a Cast
 void addActorToMovie() {
