@@ -20,12 +20,27 @@ public:
         : id(id), name(name), birthYear(birthYear), rating(rating), noOfTimesRated(noOfTimesRated) {
     }
 
+    /*
+    Adds a movie to the actor's list of movies
 
+    This function adds a pointer to a Movie object to the actor's list of movies, creating a relationship between the actor and the movie
+
+    Parameter - movie: A pointer to the Movie object to be added
+    Return - None (updates the actor's movie list)
+
+    */
     void addMovie(Movie* movie) {
         movies.push_back(movie);
     }
 
-    // Update the average rating with a new rating (1 to 5 stars).
+    /*
+    Updates the actor's average rating with a new rating
+
+	This function calculates the average rating of the actor based on the new rating and the number of times the actor has been rated
+
+    Parameter - newRating: An integer (1 to 5) representing the new rating
+    Return - None (modifies the actor's rating and increments the rating count)
+    */
     void updateRating(int newRating) {
         // new average = ((old average * count) + newRating) / (count + 1)
         rating = ((rating * noOfTimesRated) + newRating) / (noOfTimesRated + 1);

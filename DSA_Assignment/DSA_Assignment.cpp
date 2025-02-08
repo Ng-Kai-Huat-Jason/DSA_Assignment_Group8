@@ -1,5 +1,7 @@
-// Student 1: Ng Kai Huat Jason (S10262552)
-// Student 2: Law Ming Qi (S10257808)
+/*
+	Group 8 of P01
+	Team Members: Ng Kai Huat Jason (S10262552), Law Ming Qi (S10257808)
+*/
 
 #include <iostream>
 #include <string>
@@ -18,16 +20,21 @@
 
 using namespace std;
 
-// ==================== Global Variables ====================
-// Global vectors to track new entries
-vector<Actor*> newActors;               // Stores newly added actors
-vector<Movie*> newMovies;               // Stores newly added movies
-vector<pair<string, string>> newCasts;  // Stores new cast relationships (ActorID, MovieID)
 
-// Global data structures
-Dictionary<string, Actor> actorDictionary;  // Dictionary to store actors
-Dictionary<string, Movie> movieDictionary;  // Dictionary to store movies
-Graph<string> actorMovieGraph;              // Graph to represent actor-movie relationships
+// Stores newly added actors
+vector<Actor*> newActors;     
+
+// Stores newly added movies
+vector<Movie*> newMovies;              
+
+// Stores new cast relationships (ActorID, MovieID)
+vector<pair<string, string>> newCasts; 
+
+Dictionary<string, Actor> actorDictionary;
+Dictionary<string, Movie> movieDictionary; 
+
+// Graph to represent actor-movie relationships
+Graph<string> actorMovieGraph;              
 
 // ==================== Menu Functions ====================
 
@@ -75,20 +82,47 @@ void userMenu() {
 }
 
 // ==================== Helper Functions ====================
-// Trims leading and trailing whitespace from a string.
+
+/*
+    Trims leading and trailing whitespace from a string
+ 
+    This function removes any leading and trailing spaces or tab characters
+    from the given string
+ 
+	Parameter - str: The string to trim
+	Return - The trimmed string
+ */
 string trim(const string& str) {
     size_t start = str.find_first_not_of(" \t");
     size_t end = str.find_last_not_of(" \t");
     return (start == string::npos || end == string::npos) ? "" : str.substr(start, end - start + 1);
 }
 
-// Check if the files exist 
+
+/*
+    Checks if a file exists in the specified path
+
+	This functions is used to check if the CSV files exist before reading or writing to them.
+
+    Parameter - filename: The name or path of the file to check
+    Return - true if the file exists, false otherwise
+*/
 bool fileExists(const string& filename) {
     struct stat buffer;
     return (stat(filename.c_str(), &buffer) == 0);
 }
 
-// Validator to check if input is empty
+
+
+/*
+    Validator to check if user input is not empty
+
+	This function repeatly prompts the user for an input till the input isnt empty. 
+    It also trims the input to remove any leading or trailing whitespaces.
+
+    Parameter - prompt: The message displayed to prompt the user for input
+    Return - A trimmed, non-empty string entered by the user
+*/
 string getNonEmptyInput(const string& prompt) {
     string input;
     while (true) {
@@ -104,7 +138,16 @@ string getNonEmptyInput(const string& prompt) {
     }
 }
 
-// Parses CSV Line into fields
+
+/*
+    Parses a CSV line into individual fields
+
+	This functions is used to parse the CSV file into individual fields for processing, 
+	while handling quoted values and commans
+
+    Parameter - line: The CSV line to parse
+    Return - A vector of strings representing the parsed fields from the CSV line
+*/
 vector<string> parseCSVLine(const string& line) {
     vector<string> fields;
     string current;
@@ -138,7 +181,15 @@ vector<string> parseCSVLine(const string& line) {
     return fields;
 }
 
-// Parses CSV Line into fields while preserving quotes
+
+/*
+    Parses a CSV line into fields while preserving quotes
+
+	This function is an alternative version of the parseCSVLine function that perserve quotes
+
+    Parameter - line: The CSV line to parse
+    Return - A vector of strings representing the parsed fields, preserving quotes
+*/
 vector<string> parseCSVLinePreserveQuotes(const string& line) {
     vector<string> fields;
     string current;
@@ -170,7 +221,14 @@ vector<string> parseCSVLinePreserveQuotes(const string& line) {
     return fields;
 }
 
-// Helper function to check if a string contains only digits.
+/*
+    Checks if a string contains only digit characters
+
+    This function checks if the string given contains only digits.
+
+    Parameter - s: The string to check
+    Return - true if the string contains only digits, false otherwise
+*/
 bool isAllDigits(const string& s) {
     for (char c : s) {
         if (!isdigit(c))
@@ -182,10 +240,19 @@ bool isAllDigits(const string& s) {
 
 // ==================== Sorting Functions ====================
 
-// Function to partition a vector for quicksort
-// This function selects a pivot element and partitions the array such that
-// elements less than the pivot are on the left, and elements greater are on the right.
-// It returns the index of the pivot element after partitioning.
+/*
+    Partitions a vector for quicksort using a custom comparison function
+
+    This function selects a pivot element and partitions the array such that
+    elements less than the pivot (based on the provided comparison function)
+    are placed before it, while greater elements are placed after it
+
+    Parameter - arr: The vector to partition
+    Parameter - low: The starting index of the partition range
+    Parameter - high: The ending index of the partition range
+    Parameter - comp: A comparison function defining the sorting order
+    Return - The index of the pivot element after partitioning
+*/
 template <typename T, typename Compare>
 int partition(vector<T>& arr, int low, int high, Compare comp) {
     T pivot = arr[high];  // Choose the last element as the pivot
@@ -202,9 +269,18 @@ int partition(vector<T>& arr, int low, int high, Compare comp) {
     return i + 1;  // Return the partitioning index
 }
 
-// Function to perform quicksort on a vector
-// This function recursively sorts the vector by partitioning it around a pivot
-// and then sorting the sub-arrays before and after the pivot.
+/*
+    Sorts a vector using the quicksort algorithm with a custom comparison function
+
+    This function recursively sorts a vector by partitioning it around a pivot element
+    and then sorting the sub-arrays before and after the pivot using a custom comparison function
+
+    Parameter - arr: The vector to sort
+    Parameter - low: The starting index of the sorting range
+    Parameter - high: The ending index of the sorting range
+    Parameter - comp: A comparison function defining the sorting order
+    Return - None (modifies the input vector in place)
+*/
 template <typename T, typename Compare>
 void quickSort(vector<T>& arr, int low, int high, Compare comp) {
     if (low < high) {
@@ -214,8 +290,18 @@ void quickSort(vector<T>& arr, int low, int high, Compare comp) {
     }
 }
 
-// Function to merge two halves of a vector for merge sort (actors by rating)
-// This function merges two sorted halves of a vector of Actor pointers based on their ratings.
+/*
+    Merges two sorted halves of a vector of Actor pointers based on their ratings
+
+    This function merges two sorted sub-arrays of a vector containing Actor pointers
+	It compares the ratings of the actors to determine the order in which they are merged
+
+    Parameter - arr: The vector of Actor pointers to merge
+    Parameter - left: The starting index of the left sub-array
+    Parameter - mid: The midpoint index where the array is split
+    Parameter - right: The ending index of the right sub-array
+    Return - None (modifies the input vector in place)
+*/
 void mergeActorsByRating(vector<Actor*>& arr, int left, int mid, int right) {
     int n1 = mid - left + 1;  // Size of the left sub-array
     int n2 = right - mid;     // Size of the right sub-array
@@ -257,8 +343,17 @@ void mergeActorsByRating(vector<Actor*>& arr, int left, int mid, int right) {
     }
 }
 
-// Function to perform merge sort on a vector of Actor pointers by rating
-// This function recursively divides the vector into two halves, sorts them, and then merges them.
+/*
+    Sorts a vector of Actor pointers by rating using the merge sort algorithm
+
+    This function recursively divides the vector into two halves, sorts each half
+    and then merges them in descending order based on actor ratings
+
+    Parameter - arr: The vector of Actor pointers to sort
+    Parameter - left: The starting index of the sorting range
+    Parameter - right: The ending index of the sorting range
+    Return - None (modifies the input vector in place)
+*/
 void mergeSortActorsByRating(vector<Actor*>& arr, int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;  // Find the middle point
@@ -268,8 +363,18 @@ void mergeSortActorsByRating(vector<Actor*>& arr, int left, int right) {
     }
 }
 
-// Function to merge two halves of a vector for merge sort (movies by rating)
-// This function merges two sorted halves of a vector of Movie pointers based on their ratings.
+/*
+    Merges two sorted halves of a vector of Movie pointers based on their ratings
+
+    This function merges two sorted sub-arrays of a vector containing Movie pointers
+    It ensures that the movies are ordered in descending order of their ratings
+
+    Parameter - arr: The vector of Movie pointers to merge
+    Parameter - left: The starting index of the left sub-array
+    Parameter - mid: The midpoint index where the array is split
+    Parameter - right: The ending index of the right sub-array
+    Return - None (modifies the input vector in place)
+*/
 void mergeMoviesByRating(vector<Movie*>& arr, int left, int mid, int right) {
     int n1 = mid - left + 1;  // Size of the left sub-array
     int n2 = right - mid;     // Size of the right sub-array
@@ -311,8 +416,17 @@ void mergeMoviesByRating(vector<Movie*>& arr, int left, int mid, int right) {
     }
 }
 
-// Function to perform merge sort on a vector of Movie pointers by rating
-// This function recursively divides the vector into two halves, sorts them, and then merges them.
+/*
+    Sorts a vector of Movie pointers by rating using the merge sort algorithm
+
+    This function recursively divides the vector into two halves, sorts each half
+    and then merges them in descending order based on movie ratings
+
+    Parameter - arr: The vector of Movie pointers to sort
+    Parameter - left: The starting index of the sorting range
+    Parameter - right: The ending index of the sorting range
+    Return - None (modifies the input vector in place)
+*/
 void mergeSortMoviesByRating(vector<Movie*>& arr, int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;  // Find the middle point
@@ -323,9 +437,17 @@ void mergeSortMoviesByRating(vector<Movie*>& arr, int left, int right) {
 }
 
 
-// ==================== Display Functions for Top 10 Actor or Movie  ====================
 
-// Display top 10 actors by rating 
+/*
+    Displays the top 10 highest-rated actors
+
+    This function prints the top 10 actors sorted by their ratings in descending order.
+    If there are fewer than 10 actors, it displays all available actors.
+    The ratings are formatted to show up to two decimal places.
+
+    Parameter - actors: A vector of Actor pointers representing the sorted list of actors
+    Return - None (outputs the top actors to the console)
+*/
 void displayTopActors(const vector<Actor*>& actors) {
     cout << "\n=====================================" << endl;
     cout << "Top 10 Rated Actors" << endl;
@@ -346,7 +468,17 @@ void displayTopActors(const vector<Actor*>& actors) {
     }
 }
 
-// Display top 10 movies by rating
+/*
+    Displays the top 10 highest-rated movies
+
+    This function prints the top 10 movies sorted by their ratings in descending order.
+    If there are fewer than 10 movies, it displays all available movies.
+    The ratings are formatted to show up to two decimal places.
+
+    Parameter - movies: A vector of Movie pointers representing the sorted list of movies
+    Return - None (outputs the top movies to the console)
+*/
+
 void displayTopMovies(const vector<Movie*>& movies) {
     cout << "\n=====================================" << endl;
     cout << "Top 10 Rated Movies" << endl;
@@ -367,9 +499,18 @@ void displayTopMovies(const vector<Movie*>& movies) {
     }
 }
 
-// ==================== Data Loading Functions ====================
 
-// load Cast Relationships from CSV 
+// ==================== File I/O Functions ====================
+/*
+    Loads cast relationships from a CSV file
+
+    This function reads a CSV file containing actor-movie relationships and updates
+    the actor dictionary, movie dictionary, and actor-movie graph accordingly
+	It validates actor and movie IDs before adding cast relationships
+
+    Parameter - fileName: The name or path of the CSV file containing cast data
+    Return - None (updates the dictionaries and graph, logs errors if entries are missing)
+*/
 void loadCastsFromCSV(const string& fileName) {
     ifstream file(fileName);
     if (!file.is_open()) {
@@ -405,9 +546,16 @@ void loadCastsFromCSV(const string& fileName) {
     cout << "[Info] Casts loaded successfully from " << fileName << endl;
 }
 
-// ==================== Data Storage Functions ====================
 
-// Use to append new actors to CSV
+/*
+    Appends newly added actors to the actors CSV file
+
+    This function writes the details of newly added actors to the actors CSV file
+    If the file does not exist, it creates a new file with a header before appending data
+
+    Parameter - None (uses the global vector `newActors`)
+    Return - None (writes actor data to the CSV file and logs success or error messages)
+*/
 void appendNewActorsToCsv() {
     string filename = "../actors.csv";
     ofstream outFile;
@@ -436,7 +584,15 @@ void appendNewActorsToCsv() {
     }
 }
 
-// Use to append new movies to CSV
+/*
+    Appends newly added movies to the movies CSV file
+
+    This function writes the details of newly added movies to the movies CSV file
+    If the file does not exist, it creates a new file with a header before appending data
+
+    Parameter - None (uses the global vector `newMovies`)
+    Return - None (writes movie data to the CSV file and logs success or error messages)
+*/
 void appendNewMoviesToCsv() {
     string filename = "../movies.csv";
     ofstream outFile;
@@ -465,7 +621,16 @@ void appendNewMoviesToCsv() {
     }
 }
 
-// Use to append new cast relationships to CSV
+/*
+    Appends newly added actor-movie relationships to the cast CSV file
+
+    This function writes new cast relationships (actor-movie pairs) to the cast CSV file
+    If the file does not exist, it creates a new file with a header before appending data
+
+    Parameter - None (uses the global vector `newCasts`)
+    Return - None (writes cast relationship data to the CSV file and logs success or error messages)
+*/
+
 void appendNewCastsToCsv() {
     string filename = "../cast.csv";
     ofstream outFile;
@@ -489,7 +654,18 @@ void appendNewCastsToCsv() {
     }
 }
 
-// Calls are storing CSV functions into 1 function
+/*
+    Stores all new and updated data to CSV files
+
+    This function appends newly added actors, movies, and cast relationships to their
+    respective CSV files
+
+    It also calls the patch functions from the Dictionary class to update existing CSV records
+
+    Parameter - None (uses global data structures to update files)
+    Return - None (writes data to CSV files and logs success messages)
+*/
+
 void storeDataToCsv() {
     cout << "[Info] Storing data to CSV files...\n";
     appendNewActorsToCsv();
@@ -501,9 +677,17 @@ void storeDataToCsv() {
     cout << "[Info] Data storage to CSV files completed.\n";
 }
 
-// ==================== Feature Functions ====================
+// ==================== Basic and Advance Features ====================
 
-// Function to add a new actor to the system
+/*
+    Adds a new actor to the system
+
+	This function prompts for new actor details and validates the input before adding the actor to the system.
+	If adding is successful, it also adds the actor to the actor-movie graph and newActors.
+
+    Parameter - None 
+    Return - None (updates the actor dictionary, newActors list, and graph)
+*/
 void addActor() {
 
     // Prompt user to enter a ID for new actor
@@ -561,7 +745,15 @@ void addActor() {
     cout << "[Success] Actor added to and Graph.\n";
 }
 
-// Function to add a new Movie to the system
+/*
+    Adds a new movie to the system
+
+	This function prompts for new movie details and validates the input before adding the movie to the system.
+	If adding is successful, it also adds the movie to the actor-movie graph and newMovies.
+
+    Parameter - None 
+    Return - None (updates the movie dictionary, newMovies list, and graph)
+*/
 void addMovie() {
     // Prompt user to enter an ID for new movie
     string id = getNonEmptyInput("Enter Movie ID: ");
@@ -602,7 +794,16 @@ void addMovie() {
     cout << "[Success] Movie added to Graph.\n";
 }
 
-// Function to add Actor to Movie as a Cast
+/*
+    Adds an actor to a movie in the system
+
+	This function prompts for the Actor ID and Movie ID, and then checks if the actor and movie exist.
+	If both exist, it checks if the actor is already in the movie. 
+    If not, it adds the actor to the movie via adding and edge to the actor-movie graph.
+
+    Parameter - None 
+    Return - None (updates the actor-movie graph and data structures)
+*/
 void addActorToMovie() {
 	// Prompt user to enter Actor ID
     string actorId = getNonEmptyInput("Enter Actor ID: ");
@@ -658,7 +859,16 @@ void addActorToMovie() {
     }
 }
 
-// Function to update Actor details
+/*
+    Updates details of an existing actor
+
+    This function allows the user to update an actor's name, birth year, or both
+    It verifies that the actor exists in the dictionary before making any changes
+    If the name is updated, it also updates the actor's name in the actor-movie graph
+
+    Parameter - None 
+    Return - None (updates the actor dictionary and graph)
+*/
 void updateActorDetails() {
     
 	// Prompt user to enter Actor ID to update
@@ -717,7 +927,16 @@ void updateActorDetails() {
 
 }
 
-// Function to update Movie details
+/*
+    Updates details of an existing movie
+
+    This function allows the user to update a movie's title, plot, year, or all fields
+    It verifies that the movie exists in the dictionary before making any changes
+    If the title is updated, it also updates the movie's title in the actor-movie graph
+
+    Parameter - None 
+    Return - None (updates the movie dictionary and graph)
+*/
 void updateMovieDetails() {
 
     // Prompt user to enter Movie ID to update
@@ -790,7 +1009,14 @@ void updateMovieDetails() {
     cout << "[Success] Movie details updated.\n";
 }
 
-// Function to combine both update functions
+/*
+    Updates details of an actor or a movie
+
+    This function prompts when the user selects to update actor/movie details and calls the respective function
+
+    Parameter - None
+    Return - None (calls either `updateActorDetails` or `updateMovieDetails`)
+*/
 void updateDetails() {
     int updateChoice;
     cout << "Update: (1) Actor Details, (2) Movie Details: ";
@@ -808,7 +1034,15 @@ void updateDetails() {
     }
 }
 
-// Function to display recent movies ( past 3 years ) of prompted year 
+/*
+    Displays movies released within the past three years of a given year
+
+	This functions prompt for a base year and displays the movies released within the past three years
+	and sorts them in ascending order by year before displaying them
+
+    Parameter - None 
+    Return - None (displays the filtered list of recent movies)
+*/
 void displayRecentMovies() {
 
 	// Prompt user to enter a year
@@ -853,7 +1087,14 @@ void displayRecentMovies() {
     }
 }
 
-// Function to display actors by age range
+/*
+    Displays actors within a specified age range
+
+	This functions prompt the user for the lower and upper age limits and displays the actors within the range
+
+    Parameter - None 
+    Return - None (displays the filtered list of actors)
+*/
 void displayActorsByAgeRange() {
     int x, y;
 
@@ -927,7 +1168,15 @@ void displayActorsByAgeRange() {
 }
 
 
-// Function to get movies by actor
+/*
+    Displays all movies an actor has starred in
+
+	This function prompts the user to enter an actor's name and checks if they exist,
+	then retrieves and displays all movies the actor has starred in.
+
+    Parameter - None
+    Return - None (displays the list of movies the actor has starred in)
+*/
 void getMoviesByActor() {
 
 	// Prompt user to enter actor name
@@ -949,7 +1198,15 @@ void getMoviesByActor() {
     }
 }
 
-// Function to get actors by movie
+/*
+    Displays all actors who starred in a given movie
+
+	This function prompts the user to enter a movie title and checks if it exists in the actor-movie graph
+    If so, it retrieves all the actors and displays them, It also checks for quoted titles
+
+    Parameter - None 
+    Return - None (displays the list of actors in the given movie)
+*/
 void getActorsByMovie() {
     // Prompt the user for the movie title.
     string movieTitle = getNonEmptyInput("Enter movie title: ");
@@ -999,7 +1256,15 @@ void getActorsByMovie() {
 }
 
 
-// Function to display actors known by a specified actor and vice versa
+/*
+    Displays all actors that a given actor knows
+
+    This function prompts the user to enter an actor's name and checks if they exist in the actor-movie graph 
+    If found, it performs a breadth-first search (BFS) to retrieve and display all actors the given actor is connected
+
+    Parameter - None
+    Return - None (displays the list of known actors)
+*/
 void displayKnownActors() {
     string actorName = getNonEmptyInput("Enter actor name: ");
     if (!actorMovieGraph.nodeExists(actorName)) {
@@ -1009,7 +1274,15 @@ void displayKnownActors() {
     actorMovieGraph.bfs(actorName);
 }
 
-// Function to allow the user to rate an Actor or a Movie
+/*
+    Allows the user to rate an actor or a movie
+
+    This function prompts the user to either rate an actor or a movie,
+	It will prompt for the actor and validate if they exist then prompt for a rating between 1 and 5.
+
+    Parameter - None
+    Return - None (updates the rating of the selected actor or movie)
+*/
 void rateMovieOrActor() {
 
     // Prompt the user to choose between rating an Actor or a Movie
@@ -1127,7 +1400,15 @@ void rateMovieOrActor() {
     }
 }
 
-// Function to display either top 10 actor or movie ratings
+/*
+    Displays the top 10 highest-rated actors or movies
+
+	This function prompts the user to either view top 10 actors or movies and displays the top 10 based on rating,
+	It uses the mergeSortActorsByRating and mergeSortMoviesByRating functions to sort the actors and movies
+
+	Parameter - None
+	Return - None (displays the top 10 actors or movies)
+*/
 void displayRating() {
 
     // Prompt for either view top 10 actor or movie 
