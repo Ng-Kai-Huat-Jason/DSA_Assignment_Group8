@@ -206,11 +206,8 @@ vector<KeyValuePair<KeyType, ValueType>*> Dictionary<KeyType, ValueType>::getAll
     return nodes;
 }
 
-// --------------------
-// New CSV-related methods with improved movie title handling
-// --------------------
+
 // parseCSVLine: Splits a CSV line at commas and trims whitespace from each field.
-// Note: This version does NOT handle commas within quotes.
 static vector<string> parseCSVLine(const string& line) {
     vector<string> fields;
     string current;

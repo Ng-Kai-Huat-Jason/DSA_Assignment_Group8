@@ -9,7 +9,6 @@
 #include <limits>        // For numeric_limits
 #include <sys/stat.h>    // For fileExists
 #include <vector>
-#include <algorithm>
 
 #include "Actor.h"
 #include "Movie.h"
@@ -170,6 +169,16 @@ vector<string> parseCSVLinePreserveQuotes(const string& line) {
     }
     return fields;
 }
+
+// Helper function to check if a string contains only digits.
+bool isAllDigits(const string& s) {
+    for (char c : s) {
+        if (!isdigit(c))
+            return false;
+    }
+    return true;
+}
+
 
 // ==================== Sorting Functions ====================
 
@@ -552,49 +561,44 @@ void addActor() {
     cout << "[Success] Actor added to and Graph.\n";
 }
 
-// Function to add a new movie to system
+// Function to add a new Movie to the system
 void addMovie() {
-
-	// Prompt user to enter a ID for new movie
+    // Prompt user to enter an ID for new movie
     string id = getNonEmptyInput("Enter Movie ID: ");
 
-	// Prompt user to enter title for new movie
+    // Prompt user to enter title for new movie
     string title = getNonEmptyInput("Enter Movie Title: ");
 
-	// Prompt user to enter plot for new movie
+    // Prompt user to enter plot for new movie
     string plot = getNonEmptyInput("Enter Movie Plot: ");
-    
-	// Prompt user to enter year for new movie , reason for string is that it is stored as string for CSV compatibility
-    string year;
 
-	// Loop to ensure the user enters a valid year
+    // Prompt user to enter year for new movie (stored as a string for CSV compatibility)
+    string year;
     while (true) {
         year = getNonEmptyInput("Enter Movie Year: ");
-        if (all_of(year.begin(), year.end(), ::isdigit))
+        if (isAllDigits(year))  // Using our helper instead of all_of
             break;
         else
             cout << "[Error] Invalid year. Please enter a year containing only digits.\n";
     }
 
-	// Create a new Movie object with the provided ID, title, plot, and year
+    // Create a new Movie object with the provided ID, title, plot, and year
     Movie* newMovie = new Movie(id, title, plot, year);
 
-	// Attempt to add the new movie to the movieDictionary
+    // Attempt to add the new movie to the movieDictionary
     if (movieDictionary.add(id, newMovie)) {
         cout << "[Success] Movie \"" << title << "\" (ID: " << id << ") added successfully!\n";
         newMovies.push_back(newMovie);
     }
     else {
-		// If the movie ID already exists, print an error message and clean up the new movie object
         cout << "[Error] Movie with ID \"" << id << "\" already exists.\n";
         delete newMovie;
         return;
     }
 
-	// Add the movie's title as a node in the actor-movie graph
+    // Add the movie's title as a node in the actor-movie graph
     actorMovieGraph.addNode(title);
 
-	// Print a success message indicating the movie was added to graph
     cout << "[Success] Movie added to Graph.\n";
 }
 
@@ -849,59 +853,49 @@ void displayRecentMovies() {
     }
 }
 
-// Function to display actors within a specified age range.
+// Function to display actors by age range
 void displayActorsByAgeRange() {
-
-    // Create variables to store the lower and upper age limits
     int x, y;
 
     // Get the current year dynamically
     time_t t = time(nullptr);
     tm currentTime;
     localtime_s(&currentTime, &t);
-
-    // Calculate the current year based on system time
     int currentYear = 1900 + currentTime.tm_year;
 
-    // Loop to prompt for the lower age limit (x)
+    // Prompt for the lower age limit (x)
     while (true) {
         cout << "Enter the lower age limit (x): ";
         cin >> x;
-
-        // Validate input: Must be a non-negative integer
         if (cin.fail() || x < 0) {
             cout << "[Error] Invalid age. Please enter a non-negative integer.\n";
-            cin.clear(); // Clear error flag
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
         else {
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear remaining input
-            break; // Exit loop when valid input is provided
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            break;
         }
     }
 
-    // Loop to prompt for the upper age limit (y)
+    // Prompt for the upper age limit (y)
     while (true) {
         cout << "Enter the upper age limit (y): ";
         cin >> y;
-
-        // Validate input: Must be greater than or equal to the lower limit (x)
         if (cin.fail() || y < x) {
             cout << "[Error] Please enter an integer >= " << x << ".\n";
-            cin.clear(); // Clear error flag
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
         else {
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear remaining input
-            break; // Exit loop when valid input is provided
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            break;
         }
     }
 
-    // Retrieve all actors from the dictionary
+    // Retrieve all actors from the dictionary and filter those within the specified age range
     vector<Actor*> allActors = actorDictionary.getAllItems();
-	vector<Actor*> filteredActors; // Vector to store actors within the specified age range
-
-    // Filter actors based on the specified age range (x to y)
+    vector<Actor*> filteredActors;
     for (Actor* actor : allActors) {
         int age = currentYear - actor->birthYear;
         if (age >= x && age <= y) {
@@ -909,22 +903,21 @@ void displayActorsByAgeRange() {
         }
     }
 
-    // Sort filtered actors by age in ascending order
-    sort(filteredActors.begin(), filteredActors.end(), [currentYear](Actor* a, Actor* b) {
-        return (currentYear - a->birthYear) < (currentYear - b->birthYear);
-        });
+    // Sort filtered actors by age in ascending order using quickSort
+    if (!filteredActors.empty()) {
+        quickSort(filteredActors, 0, filteredActors.size() - 1, [currentYear](Actor* a, Actor* b) {
+            return (currentYear - a->birthYear) < (currentYear - b->birthYear);
+            });
+    }
 
-    // Display the sorted list of actors in the specified age range
+    // Display the sorted list of actors
     cout << "\n=====================================" << endl;
     cout << "Actors Aged Between " << x << " and " << y << ":" << endl;
     cout << "=====================================" << endl;
-
-    // If no actors match the criteria, display an informative message
     if (filteredActors.empty()) {
         cout << "[Info] No actors found in the specified age range.\n";
     }
     else {
-        // Display each actor's name and calculated age
         for (const Actor* actor : filteredActors) {
             cout << "Name: " << actor->name
                 << " - Age: " << (currentYear - actor->birthYear)

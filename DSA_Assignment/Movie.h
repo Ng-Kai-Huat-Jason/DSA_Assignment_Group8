@@ -5,19 +5,19 @@
 #include <vector>
 using namespace std;
 
-class Actor; // forward declaration
+class Actor; 
 
 class Movie {
 public:
     string id;
     string title;
     string plot;
-    string year;  // Stored as string for CSV compatibility.
+    string year;  
     double rating;
     int noOfTimesRated;
     vector<Actor*> actors;
 
-    // New member: flag to indicate if the title was originally quoted.
+    // Used to make sure if title is quoted it stays quoted from storing back to CSV
     bool titleWasQuoted;
 
     Movie(string id, string title, string plot, string year, double rating = 0.0, int noOfTimesRated = 0)

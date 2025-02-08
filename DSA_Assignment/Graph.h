@@ -6,59 +6,56 @@
 #include <iostream>
 using namespace std;
 
- // Graph Template Class , this is use to represent cast for my relationship between actors and movies
-// Implements a adjacency matrix representation of a graph
-// The graph is undirected so if a actor is in a movie then there is a edge between the actor and the movie
+// Graph Template Class: Represents an undirected graph using an adjacency matrix.
+// In our use-case, nodes represent actor names or movie titles.
 template <typename T>
 class Graph {
 private:
-    int count;  ///< Keeps track of the number of nodes in the graph.
-    vector<vector<int>> adjacencyMatrix; ///< Adjacency matrix representation.
-    vector<T> nodes; ///< Stores node values (actor names, movie titles, etc.).
+    int count;                          ///< Number of nodes in the graph.
+    vector<vector<int>> adjacencyMatrix;///< Adjacency matrix representation.
+    vector<T> nodes;                    ///< Node values.
 
 public:
-
-    // Default constructor 
+    // Default constructor.
     Graph();
 
-	// Function to check if a node exists in the graph
+    // Check if a node exists in the graph.
     bool nodeExists(const T& node);
 
-	 // Function to get the index of a node in the graph
+    // Get the index of a node in the graph.
     int getNodeIndex(const T& node);
 
-	 // Add a node to the graph
+    // Add a node to the graph.
     void addNode(const T& node);
 
-	 // Add an edge between two nodes 
+    // Add an edge between two nodes.
     void addEdge(const T& source, const T& destination);
 
+    // Get all nodes adjacent to a given node.
+    std::vector<T> getNeighbors(const T& node);
 
-    // Functions to get all nodes connected to the given node 
-    vector<T> getNeighbors(const T& node);
-
-	// Function to remove a node from the graph and its edges
+    // Remove a node and its associated edges from the graph.
     void removeNode(const T& node);
 
-	 // Function to display adjacent matrix of the graph
+    // Display the adjacency matrix.
     void displayMatrix() const;
 
-    // Function to do Breath First Search from a given node
+    // Perform breadth-first search starting from a given node.
     void bfs(const T& startNode);
 
-	 // Function to update a node in the graph
+    // Update a node in the graph.
     void updateNode(const T& oldNode, const T& newNode);
 
-	 // Function to get all movies for a specific actor
-    vector<T> listMoviesForActor(const T& actorName);
+    // Get all movies for a specific actor.
+    std::vector<T> listMoviesForActor(const T& actorName);
 
-    // Function to get all actors for a specific movie
-    vector<T> listActorsForMovie(const T& movieTitle);
+    // Get all actors for a specific movie.
+    std::vector<T> listActorsForMovie(const T& movieTitle);
 
-	// Return all nodes in the graph
-    const vector<T>& getNodes() const;
+    // Return all nodes in the graph.
+    const std::vector<T>& getNodes() const;
 };
 
-#include "Graph.cpp" 
+#include "Graph.cpp"
 
 #endif // GRAPH_H

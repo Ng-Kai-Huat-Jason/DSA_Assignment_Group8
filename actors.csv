@@ -16834,8 +16834,6 @@ id,name,birth,rating,noOfTimesRated
 1650893,Brian Voelkerding,1983,0,0
 350673,Sándor Gáspár,1956,0,0
 958975,Franky,2000,0,0
-1,Joe,2000,3,4
-2,Bob,2004,5,1
-3,John,2020,0,0
-123,Ming Qi,2006,4,3
-
+1,Jason,2001,5,1
+2,Bob,1999,0,0
+3,Ming Qi,2005,0,0
