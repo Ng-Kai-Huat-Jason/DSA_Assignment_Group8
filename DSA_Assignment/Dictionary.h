@@ -51,7 +51,11 @@ std::ostream& operator<<(std::ostream& os, const KeyValuePair<KeyType, ValueType
     return os;
 }
 
-// Dictionary class
+/*
+    Dictionary class implementation using an AVL Tree for key-value storage
+    This class provides a dictionary (hash map) structure that maps keys to values.
+    It uses an array of AVL trees to handle collisions and ensure efficient operations.
+*/
 template <typename KeyType, typename ValueType>
 class Dictionary {
 private:

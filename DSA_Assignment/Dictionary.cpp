@@ -11,15 +11,30 @@
 using namespace std;
 
 namespace {
-    // Helper function to trim whitespace from a string.
+    /*
+        Trims leading and trailing whitespace from a string
+
+        This function removes any leading and trailing spaces or tab characters
+        from the given string
+
+        Parameter - str: The string to trim
+        Return - The trimmed string without leading or trailing whitespace
+    */
     string trim(const string& str) {
         size_t start = str.find_first_not_of(" \t");
         size_t end = str.find_last_not_of(" \t");
         return (start == string::npos || end == string::npos) ? "" : str.substr(start, end - start + 1);
     }
 
-    // Helper function to parse a CSV line while preserving quotes.
-    // This function toggles an inQuotes flag so that commas inside quotes are not treated as delimiters.
+    /*
+        Parses a CSV line into fields while preserving quotes
+
+        This function extracts individual fields from a CSV-formatted line,
+        handling quoted values correctly. Quotes inside quoted fields are preserved
+
+        Parameter - line: The CSV line to parse
+        Return - A vector containing the extracted fields as strings
+    */
     vector<string> parseCSVLinePreserveQuotes(const string& line) {
         vector<string> fields;
         string current;
@@ -48,11 +63,7 @@ namespace {
         fields.push_back(trim(current));
         return fields;
     }
-} // end anonymous namespace
-
-// --------------------
-// Existing implementations
-// --------------------
+}   
 
 // Constructor for Dictionary
 template <typename KeyType, typename ValueType>
@@ -72,7 +83,14 @@ Dictionary<KeyType, ValueType>::~Dictionary() {
     }
 }
 
-// Custom hash function for string keys
+/*
+    Computes the hash value for a given key
+
+	This function calculates the hash value for a given key using a polynomial rolling hash function.
+
+    Parameter - key: The key to be hashed
+    Return - An unsigned long representing the hash index within the table
+*/
 template <typename KeyType, typename ValueType>
 unsigned long Dictionary<KeyType, ValueType>::hash(const KeyType& key) const {
     unsigned long hashValue = 0;
@@ -82,9 +100,17 @@ unsigned long Dictionary<KeyType, ValueType>::hash(const KeyType& key) const {
     return hashValue;
 }
 
-// Inserts a new key value pair into the dictionary
-// if the bucket's avl tree does not exist, it creates a new one
-// checks for duplicates and inserts new kvp
+/*
+    Inserts a new key-value pair into the dictionary
+
+    This function inserts a key-value pair into the dictionary.
+    If the bucket's AVL tree does not exist, it creates a new one.
+    It also checks for duplicate keys before insertion to prevent overwriting.
+
+    Parameter - key: The key to be inserted
+    Parameter - value: A pointer to the value associated with the key
+    Return - True if insertion is successful, false if the key already exists
+*/
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::add(const KeyType& key, ValueType* value) {
     if (!value) {
@@ -116,8 +142,16 @@ bool Dictionary<KeyType, ValueType>::add(const KeyType& key, ValueType* value) {
 }
 
 
-// Removes the key–value pair identified by key from the dictionary.
-// It returns true if the removal was successful.
+/*
+    Removes a key-value pair from the dictionary
+
+
+    This function removes the KVP from the dictionary by finding the respective AVL tree bucket based on the hash value,
+	and then removing the KVP from the AVL tree. The size of the dictionary is also decremented
+
+    Parameter - key: The key associated with the value to be removed
+    Return - True if the key was successfully removed, false if the key was not found
+*/
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::remove(const KeyType& key) {
     unsigned long index = hash(key);
@@ -135,7 +169,15 @@ bool Dictionary<KeyType, ValueType>::remove(const KeyType& key) {
     return true;
 }
 
-// Returns the ValueType* associated with the given key by searching in the AVL tree of that bucket
+/*
+    Retrieves the value associated with a given key
+
+    This function searches the given key in the respective AVL tree bucket in the dictionary.
+    If the key is found, the value is returned , if not it returns a nullptr
+
+    Parameter - key: The key whose associated value is to be retrieved
+    Return - A pointer to the associated value (ValueType*) if found, otherwise nullptr
+*/
 template <typename KeyType, typename ValueType>
 ValueType* Dictionary<KeyType, ValueType>::get(const KeyType& key) const {
     unsigned long index = hash(key);
@@ -153,19 +195,39 @@ ValueType* Dictionary<KeyType, ValueType>::get(const KeyType& key) const {
 }
 
 
-// Check if the dictionary is empty
+/*
+    Checks if the dictionary is empty
+
+	This functions checks if the dictionary is empty by checking the size of the dictionary is equal to 0
+
+    Return - True if the dictionary is empty, false otherwise
+*/
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::isEmpty() const {
     return size == 0;
 }
 
-// Get the size of the dictionary
+/*
+    Retrieves the number of KVPs in the dictionary
+
+    This function returns the total number of KVPs currently stored
+
+    Return - The number of elements in the dictionary
+*/
+
 template <typename KeyType, typename ValueType>
 int Dictionary<KeyType, ValueType>::getSize() const {
     return size;
 }
 
-// Print the dictionary (for debugging)
+/*
+    Prints the contents of the dictionary
+
+    This function iterates through all hash table buckets and prints the key-value
+    pairs stored in each AVL tree. It displays only non-empty buckets.
+
+    Return - Void (Outputs dictionary contents to the console)
+*/
 template <typename KeyType, typename ValueType>
 void Dictionary<KeyType, ValueType>::print() const {
     for (int i = 0; i < MAX_SIZE; ++i) {
@@ -176,7 +238,13 @@ void Dictionary<KeyType, ValueType>::print() const {
     }
 }
 
-// Returns a vector of all values in the dictionary.
+/*
+    Retrieves all values stored in the dictionary
+
+    This function iterates through all the hash table buckets and collects all values from the AVL trees into a vector
+
+    Return - A vector containing pointers to all values stored in the dictionary
+*/
 template <typename KeyType, typename ValueType>
 vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
     vector<ValueType*> items;
@@ -191,7 +259,13 @@ vector<ValueType*> Dictionary<KeyType, ValueType>::getAllItems() const {
     return items;
 }
 
-// Returns a vector of pointers to all nodes.
+/*
+    Retrieves all key-value pairs stored in the dictionary
+
+    This function iterates through all the hash table buckets and collects all key-value pairs from the AVL trees into a vector
+
+    Return - A vector containing pointers to all key-value pairs in the dictionary
+*/
 template <typename KeyType, typename ValueType>
 vector<KeyValuePair<KeyType, ValueType>*> Dictionary<KeyType, ValueType>::getAllNodes() const {
     vector<KeyValuePair<KeyType, ValueType>*> nodes;
@@ -207,7 +281,14 @@ vector<KeyValuePair<KeyType, ValueType>*> Dictionary<KeyType, ValueType>::getAll
 }
 
 
-// parseCSVLine: Splits a CSV line at commas and trims whitespace from each field.
+/*
+    Parses a CSV line into individual fields
+
+    This functions takes a CSV line and splits it into seperate fields while trimming whitespaces
+
+    Parameter - line: The input CSV line as a string
+    Return - A vector of strings containing the parsed fields
+*/
 static vector<string> parseCSVLine(const string& line) {
     vector<string> fields;
     string current;
@@ -224,6 +305,15 @@ static vector<string> parseCSVLine(const string& line) {
     return fields;
 }
 
+/*
+    Loads movie data from a CSV file into the dictionary
+
+	This function reads the movie.CSV and adds it to the dictionary, validating duplicate entries and missing fields
+
+    Parameter - fileName: The name of the CSV file to load data from
+    Parameter - isActor: A boolean flag indicating whether the file contains actor data (unused in this function)
+    Return - True if the file is successfully loaded, false otherwise
+*/
 template<>
 bool Dictionary<string, Movie>::loadFromCSV(const string& fileName, bool isActor) {
     ifstream file(fileName);
@@ -268,6 +358,16 @@ bool Dictionary<string, Movie>::loadFromCSV(const string& fileName, bool isActor
     return true;
 }
 
+
+/*
+    Loads actor data from a CSV file into the dictionary
+
+    This function reads the actors.CSV and adds it to the dictionary, validating duplicate entries and missing fields
+
+    Parameter - fileName: The name of the CSV file to load data from
+    Parameter - isActor: A boolean flag indicating whether the file contains actor data (unused in this function)
+    Return - True if the file is successfully loaded, false otherwise
+*/
 template<>
 bool Dictionary<string, Actor>::loadFromCSV(const string& fileName, bool isActor) {
     ifstream file(fileName);
@@ -304,9 +404,17 @@ bool Dictionary<string, Actor>::loadFromCSV(const string& fileName, bool isActor
     cout << "[Info] Data loaded successfully from " << fileName << endl;
     return true;
 }
-// Patches the CSV file based on the current dictionary state.
-// For each record in the CSV, if the key exists in the dictionary,
-// it rebuilds the record from the stored object's current data.
+
+/*
+    Updates (patches) the CSV file with the latest data from the dictionary
+
+    This functions reads the CSV files and update the records based on the current dictionary. 
+	It updated the data instead appending new one and make sure the data is correctly formatted
+
+    Parameter - fileName: The name of the CSV file to be patched
+    Parameter - isActor: A boolean flag indicating whether the file contains actor data
+    Return - True if the file is successfully updated, false otherwise
+*/
 template <typename KeyType, typename ValueType>
 bool Dictionary<KeyType, ValueType>::patchCSV(const string& fileName, bool isActor) {
     ifstream inFile(fileName);
